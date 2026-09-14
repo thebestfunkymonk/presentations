@@ -6,83 +6,102 @@
 <title>Quiz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,400&family=Archivo:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #1B2230; --fg: #F3EFE6; --muted: #A6ADBA; --accent: #F5B841; --card: rgba(255,255,255,0.08); --rule: rgba(255,255,255,0.14);
-    --a0: #D64545; --a1: #2F7BE0; --a2: #D9A400; --a3: #2E9E5B;
-    --display: "Bricolage Grotesque", "Avenir Next Condensed", "Helvetica Neue", Arial, sans-serif;
-    --font: "Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-    color-scheme: dark;
+    --paper: #FFFFFF; --ink: #0A0A0A; --gray: #6B6B6B; --accent: #FFD400; --card: #F2F2F2;
+    --a0: #E23D3D; --a1: #2B6BE0; --a2: #F2B400; --a3: #2E9E5B;
+    --display: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --font: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "Space Mono", ui-monospace, Menlo, monospace;
+    color-scheme: light;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; border-radius: 0 !important; }
   html, body { height: 100%; margin: 0; }
-  body { background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
   #app { min-height: 100%; display: flex; flex-direction: column; padding: 4vmin; gap: 3vmin; }
-  h1 { margin: 0; line-height: 1.02; font-family: var(--display); font-weight: 800; letter-spacing: -0.02em; }
-  code { font-family: var(--mono); background: var(--card); padding: 0.1em 0.35em; border-radius: 4px; }
-  .muted { color: var(--muted); }
+  h1 { margin: 0; line-height: 1; font-family: var(--display); font-weight: 500; letter-spacing: -0.02em; }
+  code { font-family: var(--mono); background: var(--card); padding: 0.1em 0.35em; font-size: 0.9em; }
+  .muted { color: var(--gray); }
   button {
-    font: inherit; border: 0; border-radius: 12px; padding: 0.6em 1.2em; cursor: pointer;
-    background: var(--accent); color: var(--bg); font-weight: 600;
+    font: inherit; font-weight: 600; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    padding: 0.6em 1.2em; cursor: pointer; background: var(--accent); color: var(--ink);
   }
-  button:disabled { opacity: 0.5; cursor: default; }
-  input[type=text] { font: inherit; padding: 0.6em 0.8em; border: 2px solid var(--rule); background: var(--card); color: var(--fg); border-radius: 12px; width: 100%; }
+  button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  input[type=text] { font: inherit; padding: 0.6em 0.8em; border: 3px solid var(--ink); background: var(--paper); color: var(--ink); width: 100%; }
   .row { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; }
   .grow { flex: 1; }
   .center { text-align: center; align-items: center; justify-content: center; }
-  .banner { background: rgba(245,184,65,0.15); border-left: 3px solid var(--accent); padding: 0.6em 1em; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+  .banner { border: 3px solid var(--ink); border-left: 14px solid var(--accent); padding: 0.6em 1em; font-size: 0.85em; }
+  .level { display: inline-block; font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 0.25em 0.7em; }
+  .fsbtn {
+    position: fixed; bottom: 4vmin; right: 4vmin; z-index: 5; font-family: var(--mono); font-size: 0.7rem; font-weight: 400;
+    text-transform: uppercase; letter-spacing: 0.08em; background: var(--paper); border-width: 2px; box-shadow: none; padding: 0.4em 0.9em;
+  }
+  .fsbtn:hover { background: var(--ink); color: var(--paper); }
+  :fullscreen .fsbtn { display: none; }
 
   /* answers grid, shared by host and player */
-  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 2vmin; flex: 1; }
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5vmin; flex: 1; padding-right: 5px; padding-bottom: 5px; }
   .ans {
-    display: flex; align-items: center; gap: 0.5em; padding: 1em; border-radius: 14px; color: #fff;
-    font-weight: 600; font-size: 1.1em; line-height: 1.2; text-align: left; min-height: 4em;
-    transition: opacity 200ms, transform 100ms;
+    display: flex; align-items: center; gap: 0.5em; padding: 1em; color: #fff; border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink);
+    font-weight: 600; font-size: 1.1em; line-height: 1.2; text-align: left; min-height: 4em; transition: opacity 200ms;
   }
   .ans .shape { font-size: 1.4em; width: 1.4em; text-align: center; flex-shrink: 0; }
   .ans.c0 { background: var(--a0); } .ans.c1 { background: var(--a1); }
-  .ans.c2 { background: var(--a2); } .ans.c3 { background: var(--a3); }
-  .ans.dim { opacity: 0.25; }
-  .ans.correct { outline: 5px solid var(--fg); outline-offset: 3px; }
+  .ans.c2 { background: var(--a2); color: var(--ink); } .ans.c3 { background: var(--a3); }
   .ans.dim { opacity: 0.2; }
-  .ans .count { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 1.3em; }
-  button.ans:active { transform: scale(0.97); }
+  .ans.correct { outline: 5px solid var(--ink); outline-offset: 4px; }
+  .ans .count { margin-left: auto; font-family: var(--mono); font-size: 1.3em; }
+  button.ans:active { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
 
   /* host */
   .host { font-size: calc(1rem + 1.2vmin); }
-  .host h1 { font-size: 2.2em; }
-  .host .question { font-family: var(--display); font-size: 1.9em; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
-  .code { font-family: var(--display); font-size: 4.5em; font-weight: 800; letter-spacing: 0.12em; line-height: 1; color: var(--accent); }
-  .qr { background: #fff; padding: 12px; border-radius: 12px; display: inline-block; }
+  .host h1 { font-size: 2.6em; }
+  .host .question { font-family: var(--display); font-weight: 500; font-size: 2em; letter-spacing: -0.02em; line-height: 1.05; text-wrap: balance; }
+  .code { font-family: var(--font); font-weight: 900; font-size: 4.5em; letter-spacing: 0.08em; line-height: 1; color: var(--accent); -webkit-text-stroke: 2px var(--ink); }
+  .qr { background: #fff; padding: 12px; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); display: inline-block; }
   .qr img, .qr canvas { display: block; }
   .players { display: flex; flex-wrap: wrap; gap: 0.5em; }
-  .chip { background: var(--card); border: 1px solid var(--rule); padding: 0.3em 0.8em; border-radius: 999px; font-size: 0.8em; }
-  .timer { height: 10px; background: var(--card); border-radius: 5px; overflow: hidden; }
-  .timer div { height: 100%; background: var(--accent); width: 100%; transform-origin: left; border-radius: 5px; }
+  .chip { border: 2px solid var(--ink); padding: 0.2em 0.7em; font-family: var(--mono); font-size: 0.7em; }
+  .timer { height: 14px; border: 3px solid var(--ink); overflow: hidden; }
+  .timer div { height: 100%; background: var(--accent); width: 100%; transform-origin: left; }
   .timer.run div { animation: shrink linear forwards; }
   @keyframes shrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-  .board { display: grid; grid-template-columns: auto 1fr auto; gap: 0.3em 1em; font-size: 0.9em; align-items: center; }
+  .board { display: grid; grid-template-columns: auto 1fr auto; gap: 0.4em 1em; font-size: 0.9em; align-items: center; }
   .board b { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-  .bar { height: 0.9em; background: var(--accent); border-radius: 4px; min-width: 2px; }
-  .podium { display: flex; gap: 2vmin; align-items: flex-end; justify-content: center; flex: 1; }
-  .podium div { background: var(--card); border-radius: 12px 12px 0 0; padding: 1em; text-align: center; width: 28%; }
-  .podium .p1 { height: 60%; background: var(--accent); color: var(--bg); }
-  .podium .p1 .muted { color: inherit; opacity: 0.7; } .podium .p2 { height: 45%; } .podium .p3 { height: 35%; }
-  .podium .name { font-family: var(--display); font-weight: 800; font-size: 1.3em; word-break: break-word; }
-  .hint { font-family: var(--mono); font-size: 0.55em; color: var(--muted); margin-top: auto; }
+  .bar { height: 0.9em; background: var(--accent); border: 2px solid var(--ink); min-width: 4px; }
+  .podium { display: flex; gap: 3vmin; align-items: flex-end; justify-content: center; flex: 1; padding: 0 8px 8px 0; }
+  .podium > div { border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); background: var(--paper); padding: 1em; text-align: center; width: 28%; display: flex; flex-direction: column; justify-content: flex-end; gap: 0.2em; }
+  .podium .p1 { height: 60%; background: var(--accent); } .podium .p2 { height: 45%; } .podium .p3 { height: 35%; }
+  .podium .name { font-family: var(--display); font-weight: 500; font-size: 1.4em; line-height: 1.05; overflow-wrap: anywhere; }
+  .podium .place { font-family: var(--mono); font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.1em; }
+  .podium .pts { font-family: var(--mono); }
+  .hint { font-family: var(--mono); font-size: 0.55em; color: var(--gray); margin-top: auto; }
+  .rt-board { display: grid; grid-template-columns: auto 1fr auto; gap: 0.3em 1em; font-size: 0.9em; align-items: center; }
+  .rt-board b { font-family: var(--mono); }
 
   /* player */
   .player { font-size: 1.15rem; }
-  .player h1 { font-size: 1.6em; }
+  .player h1 { font-size: 2em; }
   .player .answers { min-height: 60vh; }
   .player .ans { font-size: 1.05em; min-height: 5em; }
-  .player .question { font-size: 1.05em; font-weight: 600; }
-  .big { font-family: var(--display); font-size: 3.2em; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
-  .result { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5em; text-align: center; border-radius: 16px; padding: 1em; }
+  .player .question { font-family: var(--display); font-size: 1.25em; font-weight: 500; line-height: 1.1; }
+  .big { font-family: var(--font); font-weight: 900; font-size: 3.2em; line-height: 1; letter-spacing: -0.03em; }
+  .result { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5em; text-align: center; padding: 1em; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); margin-right: 6px; margin-bottom: 6px; }
   .result.ok { background: var(--a3); color: #fff; } .result.no { background: var(--a0); color: #fff; }
-  .result.wait { background: var(--card); border: 1px solid var(--rule); }
+  .result.wait { background: var(--paper); }
+
+  /* reaction round (player) */
+  .rt {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55vh;
+    border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); margin-right: 6px; margin-bottom: 6px;
+    background: var(--card); cursor: pointer; user-select: none; -webkit-user-select: none; font-size: 1.4em; text-align: center; padding: 1em;
+  }
+  .rt.waiting { background: var(--ink); color: var(--paper); }
+  .rt.go { background: var(--a3); color: #fff; }
+  .rt small { display: block; font-size: 0.6em; opacity: 0.8; margin-top: 0.5em; }
 </style>
 </head>
 <body>
@@ -105,6 +124,8 @@ const FIREBASE_CONFIG = null;
 
 const QUESTION_SECONDS = 20;
 const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
+const REACTION_SECONDS = 30;
+const reactionPoints = ms => Math.round(Math.min(1000, 250000 / Math.max(ms, 1))); // 250 ms = 1000 points
 </script>
 
 <script>
@@ -239,10 +260,33 @@ const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
       render(`<div class="result wait"><div class="muted">You're in as</div><div class="big" style="font-size:2em">${esc(name)}</div><p>${msg}</p></div>`);
     }
 
-    function showQuestion(q) {
+    function showReaction(q) {
       current = q; answered = null;
       render(`
-        <div class="muted">Question ${q.n + 1} of ${q.total}</div>
+        <div class="row"><span class="muted">Round ${q.n + 1} of ${q.total}</span><span class="level">Reaction</span></div>
+        <div class="question">${esc(q.text)}</div>
+        <div class="rt" id="rt">Tap to start<small>When this box turns green, tap it as fast as you can</small></div>`);
+      const box = document.getElementById('rt');
+      let state = 'idle', timer = null, t0 = 0;
+      box.addEventListener('click', () => {
+        if (state === 'idle') {
+          state = 'waiting'; box.className = 'rt waiting'; box.innerHTML = 'Wait for it...';
+          timer = setTimeout(() => { state = 'go'; t0 = performance.now(); box.className = 'rt go'; box.innerHTML = 'TAP'; }, 1200 + Math.random() * 3000);
+        } else if (state === 'waiting') {
+          clearTimeout(timer); state = 'idle'; box.className = 'rt'; box.innerHTML = 'Too early!<small>Tap to try again</small>';
+        } else if (state === 'go') {
+          const ms = Math.round(performance.now() - t0); state = 'done'; answered = ms;
+          bus.send({ t: 'answer', id, q: q.n, ms });
+          render(`<div class="result wait"><div class="big">${ms} ms</div><p>Locked in.</p><p class="muted">Waiting for everyone else...</p></div>`);
+        }
+      });
+    }
+
+    function showQuestion(q) {
+      if (q.type === 'reaction') return showReaction(q);
+      current = q; answered = null;
+      render(`
+        <div class="row"><span class="muted">Question ${q.n + 1} of ${q.total}</span>${q.level ? `<span class="level">${esc(q.level)}</span>` : ''}</div>
         <div class="question">${esc(q.text)}</div>
         <div class="answers">${q.choices.map((c, i) => answerButton(i, c).replace('<div', '<button data-i="' + i + '"').replace(/<\/div>$/, '</button>')).join('')}</div>`);
       app.querySelectorAll('button.ans').forEach(b => b.onclick = () => {
@@ -255,6 +299,16 @@ const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
     function showReveal(m) {
       const r = m.results[id];
       if (!r) { showWaiting('You missed that one. Next question soon.'); return; }
+      if (m.type === 'reaction') {
+        render(`
+          <div class="result ${r.ms ? 'ok' : 'no'}">
+            <div class="big">${r.ms ? r.ms + ' ms' : 'No tap'}</div>
+            <div style="font-size:1.6em">+${r.points}</div>
+            <div>Class average: ${m.avg} ms &middot; fastest: ${m.best} ms</div>
+            <div style="opacity:0.85">You're #${r.rank} with ${r.score} points</div>
+          </div>`);
+        return;
+      }
       render(`
         <div class="result ${r.correct ? 'ok' : 'no'}">
           <div class="big">${r.correct ? 'Correct!' : 'Nope'}</div>
@@ -316,12 +370,13 @@ const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
     const players = {};   // id -> {name, score}
     let phase = 'lobby', qi = -1, qStart = 0, answers = {}, timer = null;
     const cur = () => questions[qi];
-    const dur = () => (cur().time || QUESTION_SECONDS) * 1000;
+    const dur = () => (cur().time || (cur().type === 'reaction' ? REACTION_SECONDS : QUESTION_SECONDS)) * 1000;
 
     const render = html => app.innerHTML = html;
+    document.body.insertAdjacentHTML('beforeend', '<button class="fsbtn" onclick="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()">Fullscreen</button>');
     const ranked = () => Object.entries(players).map(([id, p]) => ({ id, ...p })).sort((a, b) => b.score - a.score);
     const resultsFor = () => {
-      const out = {}; ranked().forEach((p, i) => out[p.id] = { rank: i + 1, score: p.score, points: p.points || 0, correct: !!p.correct });
+      const out = {}; ranked().forEach((p, i) => out[p.id] = { rank: i + 1, score: p.score, points: p.points || 0, correct: !!p.correct, ms: p.ms || null });
       return out;
     };
 
@@ -362,22 +417,51 @@ const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
       if (phase === 'question') return;
       if (qi + 1 >= questions.length) return end();
       qi++; answers = {}; phase = 'question'; qStart = Date.now();
-      Object.values(players).forEach(p => { p.points = 0; p.correct = false; });
+      Object.values(players).forEach(p => { p.points = 0; p.correct = false; p.ms = null; });
       const q = cur();
-      const msg = { t: 'question', n: qi, total: questions.length, text: q.text, choices: q.choices, seconds: dur() / 1000 };
+      const msg = { t: 'question', type: q.type || 'choice', level: q.level || '', n: qi, total: questions.length, text: q.text, choices: q.choices || [], seconds: dur() / 1000 };
       bus.send(msg); bus.setState(msg);
+      clearTimeout(timer); timer = setTimeout(reveal, dur());
+      if (q.type === 'reaction') {
+        render(`
+        <div class="row"><span class="muted">Round ${qi + 1} of ${questions.length}</span><span class="level">Reaction</span><span class="grow"></span><span id="count" class="muted">0 done</span></div>
+        <div class="timer run"><div style="animation-duration:${dur()}ms"></div></div>
+        <div class="question">${esc(q.text)}</div>
+        <p>On your phone: tap to start, then tap again the instant the box turns green. Fastest tap wins the most points.</p>`);
+        return;
+      }
       render(`
-        <div class="row"><span class="muted">Question ${qi + 1} of ${questions.length}</span><span class="grow"></span><span id="count" class="muted">0 answered</span></div>
+        <div class="row"><span class="muted">Question ${qi + 1} of ${questions.length}</span>${q.level ? `<span class="level">${esc(q.level)}</span>` : ''}<span class="grow"></span><span id="count" class="muted">0 answered</span></div>
         <div class="timer run"><div style="animation-duration:${dur()}ms"></div></div>
         <div class="question">${esc(q.text)}</div>
         <div class="answers">${q.choices.map((c, i) => answerButton(i, c)).join('')}</div>`);
-      clearTimeout(timer); timer = setTimeout(reveal, dur());
     }
 
     function reveal() {
       if (phase !== 'question') return;
       clearTimeout(timer); phase = 'reveal';
       const q = cur(), D = dur();
+      if (q.type === 'reaction') {
+        const times = [];
+        for (const [id, a] of Object.entries(answers)) {
+          const p = players[id]; if (!p || !a.ms) continue;
+          p.ms = a.ms; p.points = reactionPoints(a.ms); p.score += p.points; times.push({ name: p.name, ms: a.ms });
+        }
+        times.sort((a, b) => a.ms - b.ms);
+        const avg = times.length ? Math.round(times.reduce((s, t) => s + t.ms, 0) / times.length) : 0;
+        const best = times.length ? times[0].ms : 0;
+        const results = resultsFor();
+        bus.send({ t: 'reveal', type: 'reaction', n: qi, results, avg, best });
+        bus.setState({ t: 'lobby' });
+        render(`
+        <div class="row"><span class="muted">Round ${qi + 1} of ${questions.length}</span><span class="level">Reaction</span><span class="grow"></span><button id="next">${qi + 1 >= questions.length ? 'Final results' : 'Next'}</button></div>
+        <div class="question">${esc(q.text)}</div>
+        <div class="row"><span>Class average <b>${avg} ms</b></span><span class="muted">&middot;</span><span>${times.length} of ${Object.keys(players).length} tapped</span></div>
+        <div class="rt-board">${times.slice(0, 6).map((t, i) => `<span>${i + 1}.</span><span>${esc(t.name)}</span><b>${t.ms} ms</b>`).join('')}</div>
+        ${q.note ? `<p>${esc(q.note)}</p>` : ''}`);
+        document.getElementById('next').onclick = next;
+        return;
+      }
       const counts = q.choices.map(() => 0);
       for (const [id, a] of Object.entries(answers)) {
         counts[a.choice]++;
@@ -405,7 +489,7 @@ const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
       phase = 'end';
       const results = resultsFor(), r = ranked();
       bus.send({ t: 'end', results }); bus.setState({ t: 'lobby' });
-      const pod = (p, cls, place) => p ? `<div class="${cls}"><div class="muted">${place}</div><div class="name">${esc(p.name)}</div><div>${p.score}</div></div>` : '';
+      const pod = (p, cls, place) => p ? `<div class="${cls}"><span class="place">${place}</span><span class="name">${esc(p.name)}</span><span class="pts">${p.score}</span></div>` : '';
       render(`
         <h1 class="center">Final results</h1>
         <div class="podium">${pod(r[1], 'p2', '2nd')}${pod(r[0], 'p1', '1st')}${pod(r[2], 'p3', '3rd')}</div>
@@ -419,9 +503,9 @@ const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
         bus.send({ t: 'welcome', id: m.id });
         if (phase === 'lobby') renderPlayers();
       } else if (m.t === 'answer' && phase === 'question' && m.q === qi && players[m.id] && !answers[m.id]) {
-        answers[m.id] = { choice: m.choice, ms: Date.now() - qStart };
+        answers[m.id] = cur().type === 'reaction' ? { ms: m.ms } : { choice: m.choice, ms: Date.now() - qStart };
         const n = Object.keys(answers).length;
-        const c = document.getElementById('count'); if (c) c.textContent = `${n} answered`;
+        const c = document.getElementById('count'); if (c) c.textContent = cur().type === 'reaction' ? `${n} done` : `${n} answered`;
         if (n >= Object.keys(players).length) setTimeout(reveal, 400);
       }
     });

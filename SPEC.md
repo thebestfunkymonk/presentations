@@ -39,11 +39,16 @@ One file per talk. Assets (images) sit next to the file or inline as data URIs.
 
 Slide modifiers (optional classes on `section.slide`):
 
-| class     | effect                                              |
-|-----------|-----------------------------------------------------|
-| `title`   | centered, larger heading, for the first slide       |
-| `center`  | vertically and horizontally center the content      |
-| `dark`    | inverted colors for that slide only                 |
+| class     | effect                                                                 |
+|-----------|------------------------------------------------------------------------|
+| `cover`   | full-bleed photo with the headline in a boxed panel. Put an `img`, a `div.cover-box` (h1 + p), and a `span.credit` inside. |
+| `figure`  | text on the left, photo on the right. Wrap the words in `div.text`, then add a `figure` with `img` and `figcaption`. |
+| `center`  | vertically and horizontally center the content                         |
+| `dark`    | accent-colored background for that slide only, used for the closer     |
+
+Photos render in black and white. Other helpers: `div.eyebrow` for a small label
+chip above a heading, `p.big` for the one number a slide is about, `div.panel`
+for a bordered box, `div.src` for a source line pinned to the bottom.
 
 Inside a slide, plain HTML. `h1`/`h2` for headings, `p`, `ul`, `img`, `pre`,
 `blockquote`, `table` are all styled. Two-column layout: wrap in
@@ -59,7 +64,7 @@ Inside a slide, plain HTML. `h1`/`h2` for headings, `p`, `ul`, `img`, `pre`,
 | click right 2/3 of screen     | next            |
 | click left 1/3 of screen      | previous        |
 | swipe left / right            | next / previous |
-| `f`                           | toggle fullscreen |
+| `f` or the Fullscreen button  | toggle fullscreen |
 | `?`                           | toggle help overlay |
 | `Esc`                         | close help / exit fullscreen |
 

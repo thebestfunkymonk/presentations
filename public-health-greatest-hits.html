@@ -6,36 +6,35 @@
 <title>Public Health's Greatest Hits</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* ---------- theme: edit these ---------- */
   :root {
-    --bg: #1B2230;
-    --fg: #F3EFE6;
-    --muted: #A6ADBA;
-    --accent: #F5B841;
-    --panel: rgba(255, 255, 255, 0.06);
-    --rule: rgba(255, 255, 255, 0.14);
-    --code-bg: rgba(255, 255, 255, 0.08);
-    --display: "Bricolage Grotesque", "Avenir Next Condensed", "Helvetica Neue", Arial, sans-serif;
-    --font: "Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-    --pad: 7vmin 8vmin;
-    --fade: 220ms;
-    color-scheme: dark;
+    --paper: #FFFFFF;
+    --ink: #0A0A0A;
+    --gray: #6B6B6B;
+    --accent: #FFD400;
+    --shadow: 6px 6px 0 var(--ink);
+    --display: "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
+    --font: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "Space Mono", ui-monospace, Menlo, monospace;
+    --mast: 2.4em;
+    --pad: 5vmin 7vmin 5vmin;
+    color-scheme: light;
   }
 
   /* ---------- deck plumbing: mostly leave alone ---------- */
   html, body { height: 100%; margin: 0; }
   body {
-    background: var(--bg);
-    color: var(--fg);
+    background: var(--paper);
+    color: var(--ink);
     font-family: var(--font);
-    font-size: calc(1rem + 1.2vmin);
-    line-height: 1.45;
+    font-size: calc(1rem + 1.15vmin);
+    line-height: 1.4;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
   }
+  * { border-radius: 0 !important; }
 
   .deck { position: relative; width: 100%; height: 100%; }
 
@@ -43,103 +42,123 @@
     position: absolute;
     inset: 0;
     padding: var(--pad);
+    padding-top: calc(var(--mast) + 4vmin);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    opacity: 0;
     visibility: hidden;
-    transform: translateY(6px);
-    transition: opacity var(--fade), transform var(--fade), visibility 0s var(--fade);
     overflow: hidden;
   }
-  .slide.active {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    transition: opacity var(--fade), transform var(--fade), visibility 0s;
-  }
+  .slide.active { visibility: visible; }
 
   /* slide modifiers */
   .slide.center { justify-content: center; align-items: center; text-align: center; }
-  .slide.title  { justify-content: flex-end; }
-  .slide.title h1 { font-size: 4.2em; max-width: 11ch; margin-bottom: 0.25em; }
-  .slide.title p  { font-family: var(--mono); font-size: 0.7em; color: var(--muted); letter-spacing: 0.02em; }
-  .slide.title::after {
-    content: ""; display: block; width: 4em; height: 4px; background: var(--accent); margin-top: 1.2em;
-  }
-  .slide.dark { background: var(--accent); color: var(--bg); --muted: color-mix(in srgb, var(--bg) 70%, transparent); --rule: rgba(0,0,0,0.2); }
-  .slide.dark strong, .slide.dark .big { color: inherit; }
+  .slide.center h1 { max-width: 14ch; }
+  .slide.dark { background: var(--accent); }
+  .slide.dark h1 { font-style: italic; font-weight: 400; }
+  .slide.dark strong { background: var(--ink); color: var(--accent); }
+  .slide.dark .muted { color: var(--ink); opacity: 0.7; }
 
-  /* fragments */
-  .fragment { opacity: 0; transform: translateY(10px); transition: opacity 250ms, transform 250ms; }
-  .fragment.visible { opacity: 1; transform: none; }
+  /* cover: full-bleed photo, headline in a hard-shadow box */
+  .slide.cover { padding: 0; justify-content: flex-end; }
+  .slide.cover > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; max-height: none; filter: grayscale(1) contrast(1.05); }
+  .slide.cover .cover-box {
+    position: relative; margin: 0 7vmin 7vmin; padding: 1em 1.2em 1.1em; max-width: 60%;
+    background: var(--paper); border: 3px solid var(--ink); box-shadow: var(--shadow);
+  }
+  .slide.cover h1 { font-size: 3.8em; margin-bottom: 0.3em; }
+  .slide.cover .cover-box p { font-family: var(--mono); font-size: 0.6em; margin: 0; max-width: none; }
+  .credit {
+    position: absolute; right: 0; bottom: 0; font-family: var(--mono); font-size: 0.45em;
+    background: var(--ink); color: var(--paper); padding: 0.4em 0.9em;
+  }
+
+  /* figure: text left, photo right */
+  .slide.figure { display: grid; grid-template-columns: 1fr 0.85fr; gap: 6vmin; align-items: stretch; }
+  .slide.figure .text { display: flex; flex-direction: column; min-width: 0; }
+  .slide.figure figure { margin: 0; display: flex; flex-direction: column; min-height: 0; padding-right: 8px; padding-bottom: 8px; }
+  .slide.figure figure img {
+    flex: 1; width: 100%; min-height: 0; max-height: none; object-fit: cover;
+    border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); filter: grayscale(1) contrast(1.05);
+  }
+  figcaption { font-family: var(--mono); font-size: 0.5em; color: var(--gray); margin-top: 1.2em; }
+
+  /* fragments: hard cuts */
+  .fragment { visibility: hidden; }
+  .slide.active .fragment.visible { visibility: visible; }
 
   /* ---------- content styles ---------- */
   h1, h2, h3 {
     font-family: var(--display);
-    font-weight: 800;
-    font-variation-settings: "opsz" 96;
+    font-weight: 500;
+    font-variation-settings: "opsz" 72;
     letter-spacing: -0.02em;
-    line-height: 1.02;
-    margin: 0 0 0.55em;
+    line-height: 0.98;
+    margin: 0 0 0.5em;
     text-wrap: balance;
   }
-  h1 { font-size: 3.4em; }
-  h2 { font-size: 2.3em; max-width: 18ch; }
-  h3 { font-size: 1.25em; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-  p, ul, ol { margin: 0 0 0.75em; max-width: 42ch; }
-  li { margin-bottom: 0.35em; padding-left: 0.2em; }
-  li::marker { color: var(--accent); }
-  a { color: var(--accent); }
-  strong { font-weight: 600; color: var(--accent); }
-  .muted { color: var(--muted); }
-  .eyebrow { font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 1em; }
-  .big { font-family: var(--display); font-weight: 800; font-size: 4.5em; line-height: 0.9; letter-spacing: -0.03em; color: var(--accent); margin: 0.1em 0; }
-  code, pre { font-family: var(--mono); font-size: 0.82em; }
-  code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
-  pre { background: var(--panel); border: 1px solid var(--rule); padding: 0.8em 1em; border-radius: 8px; overflow: auto; line-height: 1.4; }
+  h1 { font-size: 4em; }
+  h2 { font-size: 2.7em; max-width: 16ch; }
+  h3 { font-size: 1.3em; font-style: italic; font-weight: 400; letter-spacing: 0; }
+  em { font-family: var(--display); font-style: italic; font-size: 1.05em; }
+  p, ul, ol { margin: 0 0 0.75em; max-width: 44ch; }
+  ul { padding-left: 1.2em; }
+  li { margin-bottom: 0.4em; padding-left: 0.2em; }
+  li::marker { content: "\25A0\00a0\00a0"; color: var(--accent); font-size: 0.8em; }
+  a { color: var(--ink); text-decoration-thickness: 3px; text-decoration-color: var(--accent); text-underline-offset: 0.15em; }
+  strong { font-weight: 600; background: var(--accent); padding: 0 0.15em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .muted { color: var(--gray); }
+  .eyebrow { display: inline-block; font-family: var(--mono); font-size: 0.55em; letter-spacing: 0.12em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 0.25em 0.7em; margin-bottom: 1.2em; }
+  .big { font-family: var(--font); font-weight: 900; font-size: 5em; line-height: 0.9; letter-spacing: -0.04em; color: var(--accent); -webkit-text-stroke: 2px var(--ink); margin: 0.1em 0; }
+  code, pre { font-family: var(--mono); font-size: 0.8em; }
+  code { background: #EEE; padding: 0.1em 0.35em; }
+  pre { border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 0.8em 1em; overflow: auto; line-height: 1.4; }
   pre code { background: none; padding: 0; }
-  blockquote { margin: 0 0 0.8em; padding-left: 0.8em; border-left: 4px solid var(--accent); color: var(--muted); max-width: 42ch; }
-  img, video, iframe { max-width: 100%; max-height: 70vh; border-radius: 6px; }
+  blockquote { margin: 0 0 0.8em; padding-left: 0.8em; border-left: 6px solid var(--accent); font-family: var(--display); font-style: italic; font-size: 1.25em; max-width: 36ch; }
+  img, video, iframe { max-width: 100%; max-height: 70vh; }
   table { border-collapse: collapse; margin-bottom: 0.8em; }
-  th, td { padding: 0.3em 0.8em; border-bottom: 1px solid var(--rule); text-align: left; }
+  th, td { padding: 0.3em 0.8em; border-bottom: 1px solid var(--ink); text-align: left; }
   th { font-weight: 600; }
 
   .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6vmin; align-items: start; }
-  .panel { background: var(--panel); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 0.7em 0.9em; }
-  .src { font-family: var(--mono); font-size: 0.5em; color: var(--muted); margin-top: auto; padding-top: 0.8em; border-top: 1px solid var(--rule); }
+  .cols > * { min-width: 0; }
+  .panel { border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 0.7em 0.9em; background: var(--paper); }
+  .src { font-family: var(--mono); font-size: 0.5em; color: var(--gray); margin-top: auto; padding-top: 0.8em; border-top: 1px solid var(--ink); }
   .src p { margin: 0.15em 0; max-width: none; }
 
-  /* ---------- chrome ---------- */
-  .running, .counter {
-    position: fixed; font-family: var(--mono); font-size: 0.55em; color: var(--muted); z-index: 10; letter-spacing: 0.04em;
+  /* ---------- chrome: masthead, folio, progress, fullscreen ---------- */
+  .masthead {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--mast); z-index: 10;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 7vmin;
+    background: var(--paper); border-bottom: 3px solid var(--ink);
+    font-family: var(--mono); font-size: 0.55em; letter-spacing: 0.08em; text-transform: uppercase;
   }
-  .running { left: 8vmin; top: 3vmin; text-transform: uppercase; }
-  .counter { right: 8vmin; bottom: 3vmin; font-variant-numeric: tabular-nums; }
-  .progress { position: fixed; left: 0; bottom: 0; height: 3px; width: 0; background: var(--accent); transition: width 200ms; z-index: 10; }
-  body.on-dark .running, body.on-dark .counter { color: rgba(0,0,0,0.55); }
-  body.on-dark .progress { background: rgba(0,0,0,0.6); }
+  .counter { font-variant-numeric: tabular-nums; }
+  .progress { position: fixed; left: 0; top: var(--mast); height: 6px; width: 0; background: var(--accent); z-index: 10; }
+  .fs {
+    position: fixed; left: 7vmin; bottom: 3vmin; z-index: 10; font-family: var(--mono); font-size: 0.5em;
+    background: var(--paper); color: var(--ink); border: 2px solid var(--ink); padding: 0.4em 0.9em; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .fs:hover { background: var(--ink); color: var(--paper); }
+  :fullscreen .fs { display: none; }
   .help {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.85); color: #fff;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.88); color: #fff;
     display: none; place-items: center; z-index: 20; font-family: var(--mono); font-size: 0.65em;
   }
   .help.open { display: grid; }
   .help table { border: none; }
   .help td { border: none; padding: 0.25em 1em; }
-  .help kbd { background: #333; padding: 0.1em 0.5em; border-radius: 4px; border: 1px solid #555; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .slide, .fragment { transition: none; transform: none; }
-  }
+  .help kbd { background: #333; padding: 0.1em 0.5em; border: 1px solid #555; }
 
   /* ---------- print: one slide per page ---------- */
   @media print {
     body { overflow: visible; }
     .deck { height: auto; }
-    .slide { position: relative; opacity: 1; visibility: visible; transform: none; height: 100vh; page-break-after: always; break-after: page; }
-    .fragment { opacity: 1; transform: none; }
-    .running, .counter, .progress, .help { display: none !important; }
+    .slide { position: relative; visibility: visible; height: 100vh; page-break-after: always; break-after: page; }
+    .fragment { visibility: visible; }
+    .masthead, .progress, .help, .fs { display: none !important; }
   }
 </style>
 </head>
@@ -150,45 +169,43 @@
   <!-- ============ SLIDES START ============ -->
 
   <style>
-    :root { --bg: #17395E; --fg: #F4F7FB; --muted: #A9BDD6; --accent: #F2E36A; --panel: rgba(255,255,255,0.07); --rule: rgba(255,255,255,0.18); }
-    .deck {
-      background-image:
-        repeating-linear-gradient(0deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 5vmin),
-        repeating-linear-gradient(90deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 5vmin);
-    }
-    .slide[data-n]::before {
-      content: attr(data-n); position: absolute; right: 4vmin; bottom: -0.12em; z-index: -1;
-      font-family: var(--display); font-weight: 800; font-size: 70vmin; line-height: 1;
-      color: rgba(255,255,255,0.06); pointer-events: none;
-    }
+    :root { --accent: #FF4D00; }
     .slide[data-n] { z-index: 0; }
-    .stat { display: flex; gap: 2.5em; margin: 0.4em 0 0.9em; }
-    .stat div b { display: block; font-family: var(--display); font-weight: 800; font-size: 2.6em; line-height: 1; letter-spacing: -0.03em; color: var(--accent); }
-    .stat div span { font-family: var(--mono); font-size: 0.55em; color: var(--muted); display: block; margin-top: 0.4em; max-width: 16ch; line-height: 1.3; }
+    .slide[data-n]::before {
+      content: attr(data-n); position: absolute; left: 4vmin; bottom: -0.16em; z-index: -1;
+      font-family: var(--font); font-weight: 900; font-size: 62vmin; line-height: 1; letter-spacing: -0.05em;
+      color: transparent; -webkit-text-stroke: 3px var(--ink); opacity: 0.14; pointer-events: none;
+    }
+    .stat { display: flex; gap: 2.5em; margin: 0.4em 0 0.9em; flex-wrap: wrap; }
+    .stat div b { display: block; font-family: var(--font); font-weight: 900; font-size: 2.6em; line-height: 1; letter-spacing: -0.04em; color: var(--accent); -webkit-text-stroke: 1.5px var(--ink); }
+    .stat div span { font-family: var(--mono); font-size: 0.55em; color: var(--gray); display: block; margin-top: 0.4em; max-width: 16ch; line-height: 1.3; }
 
-    /* chart */
     .chart { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
     .chart svg { width: 100%; height: 100%; flex: 1; overflow: visible; font-family: var(--mono); font-size: 13px; }
-    .chart .grid line { stroke: rgba(255,255,255,0.14); stroke-width: 1; }
-    .chart .axis text { fill: var(--muted); }
-    .chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+    .chart .grid line { stroke: #DDD; stroke-width: 1; }
+    .chart .axis text { fill: var(--gray); }
+    .chart .line { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
     .chart .area { fill: var(--accent); opacity: 0.1; }
-    .chart .marker { fill: var(--accent); stroke: var(--bg); stroke-width: 2.5; }
-    .chart .hover-line { stroke: var(--fg); stroke-width: 1; opacity: 0; }
+    .chart .marker { fill: var(--accent); stroke: var(--ink); stroke-width: 2.5; }
+    .chart .hover-line { stroke: var(--ink); stroke-width: 1; opacity: 0; }
     .chart-ui { display: grid; grid-template-columns: 1fr auto; gap: 0.3em 1.5em; align-items: center; font-size: 0.75em; margin-top: 0.4em; }
     .chart-ui input[type=range] { width: 100%; accent-color: var(--accent); }
-    .chart-ui .yr { font-family: var(--display); font-weight: 800; font-size: 1.8em; font-variant-numeric: tabular-nums; }
+    .chart-ui .yr { font-family: var(--font); font-weight: 900; font-size: 1.8em; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
     .chart-ui .note { grid-column: 1 / -1; min-height: 2.6em; max-width: none; }
-    .chart-ui .note b { color: var(--accent); }
+    .chart-ui .note b { background: var(--accent); padding: 0 0.15em; }
     .tip {
-      position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-family: var(--mono);
-      font-size: 0.55em; padding: 0.3em 0.6em; border-radius: 4px; opacity: 0; transform: translate(-50%, -130%); white-space: nowrap;
+      position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font-family: var(--mono);
+      font-size: 0.55em; padding: 0.3em 0.6em; opacity: 0; transform: translate(-50%, -130%); white-space: nowrap;
     }
   </style>
 
-  <section class="slide title">
-    <h1>Public Health's Greatest Hits</h1>
-    <p>The inventions that saved more lives than any medicine</p>
+  <section class="slide cover">
+    <img src="https://images.unsplash.com/photo-1600965487524-8b8c37f6c394?w=1800&q=80&auto=format&fit=crop" alt="">
+    <div class="cover-box">
+      <h1>Public Health's Greatest Hits</h1>
+      <p>The inventions that saved more lives than any medicine</p>
+    </div>
+    <span class="credit">Photo: Jason Richard / Unsplash</span>
   </section>
 
   <section class="slide">
@@ -212,62 +229,92 @@
     </div>
   </section>
 
-  <section class="slide" data-n="5">
-    <div class="eyebrow">Number 5</div>
-    <h2>Fluoride in the water</h2>
-    <p>Grand Rapids, Michigan, 1945: first city to add fluoride to its water supply.</p>
-    <div class="stat">
-      <div><b>~25%</b><span>fewer cavities, kids and adults</span></div>
-      <div><b>~$1</b><span>per person, per year</span></div>
+  <section class="slide figure" data-n="5">
+    <div class="text">
+      <div class="eyebrow">Number 5</div>
+      <h2>Fluoride in the water</h2>
+      <p>Grand Rapids, Michigan, 1945: first city to add fluoride to its water supply.</p>
+      <div class="stat">
+        <div><b>~25%</b><span>fewer cavities, kids and adults</span></div>
+        <div><b>~$1</b><span>per person, per year</span></div>
+      </div>
+      <p class="fragment muted">It works on everyone in the city, whether or not they brush, floss, or have a dentist.</p>
+      <div class="src"><p>CDC, Community Water Fluoridation</p></div>
     </div>
-    <p class="fragment muted">It works on everyone in the city, whether or not they brush, floss, or have a dentist.</p>
-    <div class="src"><p>CDC, Community Water Fluoridation</p></div>
+    <figure>
+      <img src="https://images.unsplash.com/photo-1534616042650-80f5c9b61f09?w=1800&q=80&auto=format&fit=crop" alt="">
+      <figcaption>Photo: manu schwendener / Unsplash</figcaption>
+    </figure>
   </section>
 
-  <section class="slide" data-n="4">
-    <div class="eyebrow">Number 4</div>
-    <h2>Seatbelts</h2>
-    <p>Required in new cars from 1968. New York passed the first law requiring you to actually wear one in 1984.</p>
-    <div class="stat">
-      <div><b>45%</b><span>lower risk of death, front seat</span></div>
-      <div><b>~90%</b><span>drop in deaths per mile driven since 1925</span></div>
+  <section class="slide figure" data-n="4">
+    <div class="text">
+      <div class="eyebrow">Number 4</div>
+      <h2>Seatbelts</h2>
+      <p>Required in new cars from 1968. New York passed the first law requiring you to actually wear one in 1984.</p>
+      <div class="stat">
+        <div><b>45%</b><span>lower risk of death, front seat</span></div>
+        <div><b>~90%</b><span>drop in deaths per mile driven since 1925</span></div>
+      </div>
+      <p class="fragment muted">The safety belt was not the invention. The law was.</p>
+      <div class="src"><p>NHTSA; CDC MMWR, Ten Great Public Health Achievements 1900 to 1999</p></div>
     </div>
-    <p class="fragment muted">The safety belt was not the invention. The law was.</p>
-    <div class="src"><p>NHTSA; CDC MMWR, Ten Great Public Health Achievements 1900 to 1999</p></div>
+    <figure>
+      <img src="https://images.unsplash.com/photo-1629898168297-c868a0d70ad0?w=1800&q=80&auto=format&fit=crop" alt="">
+      <figcaption>Photo: Remy Lovesy / Unsplash</figcaption>
+    </figure>
   </section>
 
-  <section class="slide" data-n="3">
-    <div class="eyebrow">Number 3</div>
-    <h2>Telling people cigarettes kill</h2>
-    <p>1964: the Surgeon General's report linked smoking to lung cancer. It was front-page news.</p>
-    <div class="stat">
-      <div><b>42%</b><span>of U.S. adults smoked in 1965</span></div>
-      <div><b>~11%</b><span>in 2022</span></div>
-      <div><b>8 million</b><span>early deaths avoided, 1964 to 2012</span></div>
+  <section class="slide figure" data-n="3">
+    <div class="text">
+      <div class="eyebrow">Number 3</div>
+      <h2>Telling people cigarettes kill</h2>
+      <p>1964: the Surgeon General's report linked smoking to lung cancer. It was front-page news.</p>
+      <div class="stat">
+        <div><b>42%</b><span>of U.S. adults smoked in 1965</span></div>
+        <div><b>~11%</b><span>in 2022</span></div>
+        <div><b>8M</b><span>early deaths avoided, 1964 to 2012</span></div>
+      </div>
+      <p class="fragment muted">There was no drug and no surgery. A report, then warning labels, taxes, and ad bans did the work.</p>
+      <div class="src"><p>CDC; Holford et al. 2014, JAMA</p></div>
     </div>
-    <p class="fragment muted">There was no drug and no surgery. A report, then warning labels, taxes, and ad bans did the work.</p>
-    <div class="src"><p>CDC; Holford et al. 2014, JAMA</p></div>
+    <figure>
+      <img src="https://images.unsplash.com/photo-1556388275-bb5585725aca?w=1800&q=80&auto=format&fit=crop" alt="">
+      <figcaption>Photo: Pascal Meier / Unsplash</figcaption>
+    </figure>
   </section>
 
-  <section class="slide" data-n="2">
-    <div class="eyebrow">Number 2</div>
-    <h2>Vaccines</h2>
-    <p>Smallpox killed an estimated <strong>300 million people</strong> in the 20th century. Last natural case: 1977. Declared gone: 1980.</p>
-    <p class="fragment">Polio in the U.S., 1952: about 21,000 kids paralyzed in one year. Vaccine in 1955. Zero U.S. cases since 1979.</p>
-    <p class="fragment muted">Smallpox is the only human disease ever eradicated. The tools were a vaccine and decades of coordinated case tracking.</p>
-    <div class="src"><p>WHO; CDC Pink Book</p></div>
+  <section class="slide figure" data-n="2">
+    <div class="text">
+      <div class="eyebrow">Number 2</div>
+      <h2>Vaccines</h2>
+      <p>Smallpox killed an estimated <strong>300 million people</strong> in the 20th century. Last natural case: 1977. Declared gone: 1980.</p>
+      <p class="fragment">Polio in the U.S., 1952: about 21,000 kids paralyzed in one year. Vaccine in 1955. Zero U.S. cases since 1979.</p>
+      <p class="fragment muted">Smallpox is the only human disease ever eradicated. The tools were a vaccine and decades of coordinated case tracking.</p>
+      <div class="src"><p>WHO; CDC Pink Book</p></div>
+    </div>
+    <figure>
+      <img src="https://images.unsplash.com/photo-1611694449252-02453c27856a?w=1800&q=80&auto=format&fit=crop" alt="">
+      <figcaption>Photo: Mufid Majnun / Unsplash</figcaption>
+    </figure>
   </section>
 
-  <section class="slide" data-n="1">
-    <div class="eyebrow">Number 1</div>
-    <h2>Clean water</h2>
-    <p>London, 1854. John Snow maps cholera deaths, finds they cluster around one pump on Broad Street, and has the handle removed.</p>
-    <p class="fragment">U.S. cities start filtering and chlorinating water around 1908. Typhoid deaths fall from ~30 per 100,000 to almost zero by 1950.</p>
-    <div class="stat fragment">
-      <div><b>~½</b><span>of all the decline in city deaths, 1900 to 1936</span></div>
-      <div><b>~¾</b><span>of the decline in infant deaths</span></div>
+  <section class="slide figure" data-n="1">
+    <div class="text">
+      <div class="eyebrow">Number 1</div>
+      <h2>Clean water</h2>
+      <p>London, 1854. John Snow maps cholera deaths, finds they cluster around one pump on Broad Street, and has the handle removed.</p>
+      <p class="fragment">U.S. cities start filtering and chlorinating water around 1908. Typhoid deaths fall from ~30 per 100,000 to almost zero by 1950.</p>
+      <div class="stat fragment">
+        <div><b>~&frac12;</b><span>of all the decline in city deaths, 1900 to 1936</span></div>
+        <div><b>~&frac34;</b><span>of the decline in infant deaths</span></div>
+      </div>
+      <div class="src"><p>Cutler &amp; Miller 2005, Demography</p></div>
     </div>
-    <div class="src"><p>Cutler &amp; Miller 2005, Demography</p></div>
+    <figure>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Snow-cholera-map-1.jpg/1920px-Snow-cholera-map-1.jpg" alt="">
+      <figcaption>John Snow's cholera map, 1854. Wikimedia Commons, public domain</figcaption>
+    </figure>
   </section>
 
   <section class="slide">
@@ -294,7 +341,7 @@
   <section class="slide center dark">
     <h1>Prevention added more years of life than treatment did.</h1>
     <p class="muted">Questions?</p>
-    <p><a href="quiz.html?deck=public-health" target="_blank" style="color:inherit">Play the quiz</a></p>
+    <p><a href="quiz.html?deck=public-health" target="_blank">Play the quiz</a></p>
   </section>
 
   <script>
@@ -393,9 +440,9 @@
 
 </main>
 
-<div class="running"></div>
-<div class="counter" aria-live="polite"></div>
+<div class="masthead"><span class="running"></span><span class="counter" aria-live="polite"></span></div>
 <div class="progress"></div>
+<button class="fs" data-no-nav onclick="Deck.toggleFullscreen()">Fullscreen</button>
 
 <div class="help" data-no-nav>
   <table>
@@ -436,7 +483,6 @@
       history.replaceState(null, '', '#' + (n + 1));
       counter.textContent = `${pad(n + 1)} / ${pad(this.count)}`;
       progress.style.width = ((n + 1) / this.count * 100) + '%';
-      document.body.classList.toggle('on-dark', slides[n].classList.contains('dark'));
       document.dispatchEvent(new CustomEvent('deck:change', { detail: { index: n, from, slide: slides[n] } }));
     },
 

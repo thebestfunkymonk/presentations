@@ -40,6 +40,15 @@ window.QUIZ = {
 
 Choices are shown in order with fixed colors and shapes (▲ ◆ ● ■).
 
+Optional fields: `level` is shown as a label on the host screen and phones
+(the sets use Bloom's taxonomy: Remember, Understand, Apply, Analyze,
+Evaluate). `type: "reaction"` makes a reaction-time round instead of a
+question: phones show a box, players tap when it turns green, and points go
+from 1000 for a 250 ms tap downward (500 at 500 ms). The host shows the
+fastest times and the class average.
+
+Host and phones both have a Fullscreen button (bottom right on the host).
+
 ## Getting it onto phones
 
 The folder is hosted on GitHub Pages, so the host page is a real URL and the
