@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1B2230; --fg: #F3EFE6; --muted: #A6ADBA; --accent: #F5B841; --card: rgba(255,255,255,0.08); --rule: rgba(255,255,255,0.14);
+    --a0: #D64545; --a1: #2F7BE0; --a2: #D9A400; --a3: #2E9E5B;
+    --display: "Bricolage Grotesque", "Avenir Next Condensed", "Helvetica Neue", Arial, sans-serif;
+    --font: "Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+  #app { min-height: 100%; display: flex; flex-direction: column; padding: 4vmin; gap: 3vmin; }
+  h1 { margin: 0; line-height: 1.02; font-family: var(--display); font-weight: 800; letter-spacing: -0.02em; }
+  code { font-family: var(--mono); background: var(--card); padding: 0.1em 0.35em; border-radius: 4px; }
+  .muted { color: var(--muted); }
+  button {
+    font: inherit; border: 0; border-radius: 12px; padding: 0.6em 1.2em; cursor: pointer;
+    background: var(--accent); color: var(--bg); font-weight: 600;
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+  input[type=text] { font: inherit; padding: 0.6em 0.8em; border: 2px solid var(--rule); background: var(--card); color: var(--fg); border-radius: 12px; width: 100%; }
+  .row { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; }
+  .grow { flex: 1; }
+  .center { text-align: center; align-items: center; justify-content: center; }
+  .banner { background: rgba(245,184,65,0.15); border-left: 3px solid var(--accent); padding: 0.6em 1em; border-radius: 0 8px 8px 0; font-size: 0.85em; }
+
+  /* answers grid, shared by host and player */
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 2vmin; flex: 1; }
+  .ans {
+    display: flex; align-items: center; gap: 0.5em; padding: 1em; border-radius: 14px; color: #fff;
+    font-weight: 600; font-size: 1.1em; line-height: 1.2; text-align: left; min-height: 4em;
+    transition: opacity 200ms, transform 100ms;
+  }
+  .ans .shape { font-size: 1.4em; width: 1.4em; text-align: center; flex-shrink: 0; }
+  .ans.c0 { background: var(--a0); } .ans.c1 { background: var(--a1); }
+  .ans.c2 { background: var(--a2); } .ans.c3 { background: var(--a3); }
+  .ans.dim { opacity: 0.25; }
+  .ans.correct { outline: 5px solid var(--fg); outline-offset: 3px; }
+  .ans.dim { opacity: 0.2; }
+  .ans .count { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 1.3em; }
+  button.ans:active { transform: scale(0.97); }
+
+  /* host */
+  .host { font-size: calc(1rem + 1.2vmin); }
+  .host h1 { font-size: 2.2em; }
+  .host .question { font-family: var(--display); font-size: 1.9em; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
+  .code { font-family: var(--display); font-size: 4.5em; font-weight: 800; letter-spacing: 0.12em; line-height: 1; color: var(--accent); }
+  .qr { background: #fff; padding: 12px; border-radius: 12px; display: inline-block; }
+  .qr img, .qr canvas { display: block; }
+  .players { display: flex; flex-wrap: wrap; gap: 0.5em; }
+  .chip { background: var(--card); border: 1px solid var(--rule); padding: 0.3em 0.8em; border-radius: 999px; font-size: 0.8em; }
+  .timer { height: 10px; background: var(--card); border-radius: 5px; overflow: hidden; }
+  .timer div { height: 100%; background: var(--accent); width: 100%; transform-origin: left; border-radius: 5px; }
+  .timer.run div { animation: shrink linear forwards; }
+  @keyframes shrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+  .board { display: grid; grid-template-columns: auto 1fr auto; gap: 0.3em 1em; font-size: 0.9em; align-items: center; }
+  .board b { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .bar { height: 0.9em; background: var(--accent); border-radius: 4px; min-width: 2px; }
+  .podium { display: flex; gap: 2vmin; align-items: flex-end; justify-content: center; flex: 1; }
+  .podium div { background: var(--card); border-radius: 12px 12px 0 0; padding: 1em; text-align: center; width: 28%; }
+  .podium .p1 { height: 60%; background: var(--accent); color: var(--bg); }
+  .podium .p1 .muted { color: inherit; opacity: 0.7; } .podium .p2 { height: 45%; } .podium .p3 { height: 35%; }
+  .podium .name { font-family: var(--display); font-weight: 800; font-size: 1.3em; word-break: break-word; }
+  .hint { font-family: var(--mono); font-size: 0.55em; color: var(--muted); margin-top: auto; }
+
+  /* player */
+  .player { font-size: 1.15rem; }
+  .player h1 { font-size: 1.6em; }
+  .player .answers { min-height: 60vh; }
+  .player .ans { font-size: 1.05em; min-height: 5em; }
+  .player .question { font-size: 1.05em; font-weight: 600; }
+  .big { font-family: var(--display); font-size: 3.2em; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  .result { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5em; text-align: center; border-radius: 16px; padding: 1em; }
+  .result.ok { background: var(--a3); color: #fff; } .result.no { background: var(--a0); color: #fff; }
+  .result.wait { background: var(--card); border: 1px solid var(--rule); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ============================================================================
+// CONFIG
+//
+// Transport, picked automatically (override with ?transport=peer|local|firebase):
+//   peer     - default when the page is served over http(s). Phones connect
+//              directly to the host's browser (WebRTC via the public PeerJS
+//              signaling server). No account, no backend.
+//   local    - default on localhost or file://. Host and players must be tabs
+//              in the SAME browser (BroadcastChannel). For trying it out.
+//   firebase - used when FIREBASE_CONFIG is set. Most robust on locked-down
+//              networks. See QUIZ.md.
+// ============================================================================
+const FIREBASE_CONFIG = null;
+
+const QUESTION_SECONDS = 20;
+const SHAPES = ['▲', '◆', '●', '■']; // ▲ ◆ ● ■
+</script>
+
+<script>
+(async () => {
+  const app = document.getElementById('app');
+  const params = new URLSearchParams(location.search);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const loadScript = src => new Promise((ok, err) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = err; document.head.appendChild(s); });
+
+  // ---------------------------------------------------------------- transport
+  // Every peer sends messages on a shared bus and hears everyone else's.
+  // The host also keeps a "state" doc so late joiners can catch up.
+  function pickTransport() {
+    const forced = params.get('transport');
+    if (forced) return forced;
+    if (FIREBASE_CONFIG) return 'firebase';
+    if (location.protocol === 'file:' || /^(localhost|127\.)/.test(location.hostname)) return 'local';
+    return 'peer';
+  }
+
+  async function makeBus(code, role) {
+    const transport = pickTransport();
+    if (transport === 'peer') {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js');
+      const hostId = 'hlthquiz-' + code;
+      const listeners = [];
+      const emit = m => listeners.forEach(cb => cb(m));
+      if (role === 'host') {
+        const conns = new Set();
+        let state = null;
+        const peer = new Peer(hostId);
+        await new Promise((ok, err) => { peer.on('open', ok); peer.on('error', e => e.type === 'unavailable-id' ? err(new Error('Room code ' + code + ' is already in use. Reload for a new one.')) : console.warn('peer', e)); });
+        peer.on('connection', c => {
+          c.on('open', () => { conns.add(c); c.send({ t: 'state', s: state }); });
+          c.on('data', emit);
+          c.on('close', () => conns.delete(c));
+          c.on('error', () => conns.delete(c));
+        });
+        return {
+          mode: 'peer',
+          send: m => conns.forEach(c => c.open && c.send(m)),
+          on: cb => listeners.push(cb),
+          setState: s => { state = s; },
+          getState: async () => state,
+        };
+      }
+      // player: connect to the host, reconnect if the channel drops
+      let conn = null, lastJoin = null, stateResolve = null;
+      const statePromise = new Promise(r => stateResolve = r);
+      const peer = new Peer();
+      await new Promise(ok => peer.on('open', ok));
+      const connect = () => {
+        conn = peer.connect(hostId, { reliable: true });
+        conn.on('open', () => { if (lastJoin) conn.send(lastJoin); });
+        conn.on('data', m => { if (m.t === 'state') stateResolve(m.s); else emit(m); });
+        const retry = () => setTimeout(connect, 1500);
+        conn.on('close', retry);
+        conn.on('error', retry);
+      };
+      connect();
+      return {
+        mode: 'peer',
+        send: m => { if (m.t === 'join') lastJoin = m; if (conn && conn.open) conn.send(m); },
+        on: cb => listeners.push(cb),
+        setState: () => {},
+        getState: () => Promise.race([statePromise, new Promise(r => setTimeout(() => r(null), 4000))]),
+      };
+    }
+    if (transport === 'firebase') {
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js');
+      firebase.initializeApp(FIREBASE_CONFIG);
+      const root = firebase.database().ref('rooms/' + code);
+      const msgs = root.child('msgs');
+      const startKey = msgs.push().key; // only hear messages from now on
+      return {
+        mode: 'firebase',
+        send: m => msgs.push(m),
+        on: cb => msgs.orderByKey().startAt(startKey).on('child_added', s => cb(s.val())),
+        setState: s => root.child('state').set(s),
+        getState: () => root.child('state').once('value').then(s => s.val()),
+      };
+    }
+    const ch = new BroadcastChannel('quiz-' + code);
+    const key = 'quiz-state-' + code;
+    return {
+      mode: 'local',
+      send: m => ch.postMessage(m),
+      on: cb => ch.addEventListener('message', e => cb(e.data)),
+      setState: s => localStorage.setItem(key, JSON.stringify(s)),
+      getState: async () => JSON.parse(localStorage.getItem(key) || 'null'),
+    };
+  }
+
+  const answerButton = (i, text, extra = '') =>
+    `<div class="ans c${i} ${extra}"><span class="shape">${SHAPES[i]}</span><span>${esc(text)}</span></div>`;
+
+  // ================================================================== PLAYER
+  async function runPlayer(code) {
+    document.body.classList.add('player');
+    const bus = await makeBus(code, 'player');
+    // identity survives a page refresh via window.name (per tab, not shared)
+    let saved = {}; try { saved = JSON.parse(window.name || '{}'); } catch {}
+    let id = saved.id || Math.random().toString(36).slice(2, 10);
+    let name = saved.name || '';
+    const remember = () => window.name = JSON.stringify({ id, name });
+    remember();
+    let current = null;   // current question message
+    let answered = null;  // choice index for current question
+    let joined = false;
+
+    const render = html => app.innerHTML = html;
+
+    function showJoin() {
+      render(`
+        <h1>Join the quiz</h1>
+        <p class="muted">Room <b>${esc(code)}</b></p>
+        <input type="text" id="name" placeholder="Your name" maxlength="20" value="${esc(name)}" autofocus>
+        <button id="go">Join</button>`);
+      const go = () => {
+        name = document.getElementById('name').value.trim().slice(0, 20);
+        if (!name) return;
+        remember();
+        bus.send({ t: 'join', id, name });
+        render(`<div class="result wait"><div class="muted">Connecting as</div><div class="big" style="font-size:2em">${esc(name)}</div></div>`);
+      };
+      document.getElementById('go').onclick = go;
+      document.getElementById('name').onkeydown = e => { if (e.key === 'Enter') go(); };
+    }
+
+    function showWaiting(msg = 'Watch the screen') {
+      render(`<div class="result wait"><div class="muted">You're in as</div><div class="big" style="font-size:2em">${esc(name)}</div><p>${msg}</p></div>`);
+    }
+
+    function showQuestion(q) {
+      current = q; answered = null;
+      render(`
+        <div class="muted">Question ${q.n + 1} of ${q.total}</div>
+        <div class="question">${esc(q.text)}</div>
+        <div class="answers">${q.choices.map((c, i) => answerButton(i, c).replace('<div', '<button data-i="' + i + '"').replace(/<\/div>$/, '</button>')).join('')}</div>`);
+      app.querySelectorAll('button.ans').forEach(b => b.onclick = () => {
+        answered = +b.dataset.i;
+        bus.send({ t: 'answer', id, q: q.n, choice: answered });
+        render(`<div class="result wait"><div class="big" style="font-size:2em">${SHAPES[answered]}</div><p>Answer locked in.</p><p class="muted">Waiting for everyone else...</p></div>`);
+      });
+    }
+
+    function showReveal(m) {
+      const r = m.results[id];
+      if (!r) { showWaiting('You missed that one. Next question soon.'); return; }
+      render(`
+        <div class="result ${r.correct ? 'ok' : 'no'}">
+          <div class="big">${r.correct ? 'Correct!' : 'Nope'}</div>
+          <div style="font-size:1.6em">+${r.points}</div>
+          <div>Answer: ${SHAPES[m.correct]} ${esc(m.choices[m.correct])}</div>
+          <div style="opacity:0.85">You're #${r.rank} with ${r.score} points</div>
+        </div>`);
+    }
+
+    function showEnd(m) {
+      const r = m.results[id];
+      render(`
+        <div class="result wait">
+          <div class="muted">Final result</div>
+          <div class="big">#${r ? r.rank : '-'}</div>
+          <div style="font-size:1.3em">${esc(name)} &middot; ${r ? r.score : 0} points</div>
+          <p class="muted">Thanks for playing.</p>
+        </div>`);
+    }
+
+    bus.on(m => {
+      if (m.t === 'welcome' && m.id === id) { if (!joined) { joined = true; showWaiting(); } }
+      else if (m.t === 'question') { if (!joined) { joined = true; } showQuestion(m); }
+      else if (m.t === 'reveal') showReveal(m);
+      else if (m.t === 'end') showEnd(m);
+      else if (m.t === 'lobby' && joined) showWaiting();
+    });
+
+    if (name) {
+      // returning player (refresh): rejoin silently and catch up
+      joined = true;
+      bus.send({ t: 'join', id, name });
+      const st = await bus.getState();
+      if (st && st.t === 'question') showQuestion(st); else showWaiting();
+    } else {
+      showJoin();
+    }
+  }
+
+  // ==================================================================== HOST
+  async function runHost() {
+    document.body.classList.add('host');
+    const deck = params.get('deck');
+    if (!deck) {
+      app.innerHTML = `<h1>Quiz host</h1><p>Add <code>?deck=NAME</code> to the URL, where <code>quizzes/NAME.js</code> exists.</p>
+        <p class="muted">Example: <code>quiz.html?deck=sleep</code></p>`;
+      return;
+    }
+    try { await loadScript('quizzes/' + deck + '.js'); } catch { app.innerHTML = `<h1>Couldn't load quizzes/${esc(deck)}.js</h1>`; return; }
+    const Q = window.QUIZ;
+    const questions = Q.questions;
+
+    const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const code = params.get('room') || Array.from({ length: 4 }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
+    let bus;
+    try { bus = await makeBus(code, 'host'); } catch (e) { app.innerHTML = `<h1>${esc(e.message)}</h1>`; return; }
+    const joinUrl = location.origin + location.pathname + '?room=' + code + (params.get('transport') ? '&transport=' + params.get('transport') : '');
+
+    const players = {};   // id -> {name, score}
+    let phase = 'lobby', qi = -1, qStart = 0, answers = {}, timer = null;
+    const cur = () => questions[qi];
+    const dur = () => (cur().time || QUESTION_SECONDS) * 1000;
+
+    const render = html => app.innerHTML = html;
+    const ranked = () => Object.entries(players).map(([id, p]) => ({ id, ...p })).sort((a, b) => b.score - a.score);
+    const resultsFor = () => {
+      const out = {}; ranked().forEach((p, i) => out[p.id] = { rank: i + 1, score: p.score, points: p.points || 0, correct: !!p.correct });
+      return out;
+    };
+
+    function lobby() {
+      phase = 'lobby';
+      bus.setState({ t: 'lobby' });
+      render(`
+        <div class="row" style="align-items:flex-start">
+          <div class="grow">
+            <h1>${esc(Q.title || 'Quiz')}</h1>
+            <p class="muted">Scan the code or go to<br><code>${esc(joinUrl)}</code></p>
+            ${location.protocol === 'file:' ? '<div class="banner">This page is opened from a file, so phones can\'t reach it. Host it (see QUIZ.md).</div>' : ''}
+            ${bus.mode === 'local' ? '<div class="banner">Test mode: players must be tabs in this same browser. Serve the page from a real URL for phones.</div>' : ''}
+            ${bus.mode === 'peer' ? '<div class="banner">Keep this tab open. Phones connect straight to it.</div>' : ''}
+            <p>Room code</p><div class="code">${code}</div>
+          </div>
+          <div class="qr" id="qr"></div>
+        </div>
+        <div class="players" id="players"></div>
+        <div class="row"><button id="start" disabled>Start</button><span class="muted" id="n">Waiting for players...</span></div>
+        <div class="hint">Space or Enter = start / next question</div>`);
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js')
+        .then(() => new QRCode(document.getElementById('qr'), { text: joinUrl, width: 220, height: 220 }))
+        .catch(() => document.getElementById('qr').textContent = 'QR unavailable');
+      document.getElementById('start').onclick = next;
+      renderPlayers();
+    }
+
+    function renderPlayers() {
+      const list = document.getElementById('players'); if (!list) return;
+      list.innerHTML = ranked().map(p => `<span class="chip">${esc(p.name)}</span>`).join('');
+      const n = Object.keys(players).length;
+      document.getElementById('n').textContent = n ? `${n} player${n === 1 ? '' : 's'}` : 'Waiting for players...';
+      document.getElementById('start').disabled = n === 0;
+    }
+
+    function next() {
+      if (phase === 'question') return;
+      if (qi + 1 >= questions.length) return end();
+      qi++; answers = {}; phase = 'question'; qStart = Date.now();
+      Object.values(players).forEach(p => { p.points = 0; p.correct = false; });
+      const q = cur();
+      const msg = { t: 'question', n: qi, total: questions.length, text: q.text, choices: q.choices, seconds: dur() / 1000 };
+      bus.send(msg); bus.setState(msg);
+      render(`
+        <div class="row"><span class="muted">Question ${qi + 1} of ${questions.length}</span><span class="grow"></span><span id="count" class="muted">0 answered</span></div>
+        <div class="timer run"><div style="animation-duration:${dur()}ms"></div></div>
+        <div class="question">${esc(q.text)}</div>
+        <div class="answers">${q.choices.map((c, i) => answerButton(i, c)).join('')}</div>`);
+      clearTimeout(timer); timer = setTimeout(reveal, dur());
+    }
+
+    function reveal() {
+      if (phase !== 'question') return;
+      clearTimeout(timer); phase = 'reveal';
+      const q = cur(), D = dur();
+      const counts = q.choices.map(() => 0);
+      for (const [id, a] of Object.entries(answers)) {
+        counts[a.choice]++;
+        const p = players[id]; if (!p) continue;
+        if (a.choice === q.correct) {
+          p.correct = true;
+          p.points = Math.round(1000 * (1 - Math.min(a.ms, D) / D / 2)); // 1000 instant, 500 at the buzzer
+          p.score += p.points;
+        }
+      }
+      const results = resultsFor();
+      bus.send({ t: 'reveal', n: qi, correct: q.correct, choices: q.choices, results });
+      bus.setState({ t: 'lobby' });
+      const top = ranked().slice(0, 5), max = Math.max(1, ...counts);
+      render(`
+        <div class="row"><span class="muted">Question ${qi + 1} of ${questions.length}</span><span class="grow"></span><button id="next">${qi + 1 >= questions.length ? 'Final results' : 'Next'}</button></div>
+        <div class="question">${esc(q.text)}</div>
+        <div class="answers" style="flex:0">${q.choices.map((c, i) => answerButton(i, c, i === q.correct ? 'correct' : 'dim').replace('</div>', `<span class="count">${counts[i]}</span></div>`)).join('')}</div>
+        ${q.note ? `<p>${esc(q.note)}</p>` : ''}
+        <div class="board">${top.map((p, i) => `<span>${i + 1}.</span><span class="row"><span>${esc(p.name)}</span><div class="bar" style="width:${Math.round(p.score / Math.max(1, top[0].score) * 30)}vw"></div></span><b>${p.score}</b>`).join('')}</div>`);
+      document.getElementById('next').onclick = next;
+    }
+
+    function end() {
+      phase = 'end';
+      const results = resultsFor(), r = ranked();
+      bus.send({ t: 'end', results }); bus.setState({ t: 'lobby' });
+      const pod = (p, cls, place) => p ? `<div class="${cls}"><div class="muted">${place}</div><div class="name">${esc(p.name)}</div><div>${p.score}</div></div>` : '';
+      render(`
+        <h1 class="center">Final results</h1>
+        <div class="podium">${pod(r[1], 'p2', '2nd')}${pod(r[0], 'p1', '1st')}${pod(r[2], 'p3', '3rd')}</div>
+        <div class="board" style="max-height:30vh;overflow:auto">${r.slice(3).map((p, i) => `<span>${i + 4}.</span><span>${esc(p.name)}</span><b>${p.score}</b>`).join('')}</div>`);
+    }
+
+    bus.on(m => {
+      if (m.t === 'join') {
+        if (!players[m.id]) players[m.id] = { name: m.name, score: 0 };
+        else players[m.id].name = m.name;
+        bus.send({ t: 'welcome', id: m.id });
+        if (phase === 'lobby') renderPlayers();
+      } else if (m.t === 'answer' && phase === 'question' && m.q === qi && players[m.id] && !answers[m.id]) {
+        answers[m.id] = { choice: m.choice, ms: Date.now() - qStart };
+        const n = Object.keys(answers).length;
+        const c = document.getElementById('count'); if (c) c.textContent = `${n} answered`;
+        if (n >= Object.keys(players).length) setTimeout(reveal, 400);
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (phase === 'lobby') { if (Object.keys(players).length) next(); }
+        else if (phase === 'reveal') next();
+        else if (phase === 'question' && e.key === 'Enter') reveal(); // Enter ends a question early
+      }
+    });
+
+    lobby();
+  }
+
+  // ------------------------------------------------------------------ boot
+  const room = params.get('room');
+  if (room && !params.get('deck')) runPlayer(room.toUpperCase());
+  else runHost();
+})();
+</script>
+</body>
+</html>

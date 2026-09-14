@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why is everyone tired?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ---------- theme: edit these ---------- */
+  :root {
+    --bg: #1B2230;
+    --fg: #F3EFE6;
+    --muted: #A6ADBA;
+    --accent: #F5B841;
+    --panel: rgba(255, 255, 255, 0.06);
+    --rule: rgba(255, 255, 255, 0.14);
+    --code-bg: rgba(255, 255, 255, 0.08);
+    --display: "Bricolage Grotesque", "Avenir Next Condensed", "Helvetica Neue", Arial, sans-serif;
+    --font: "Public Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --pad: 7vmin 8vmin;
+    --fade: 220ms;
+    color-scheme: dark;
+  }
+
+  /* ---------- deck plumbing: mostly leave alone ---------- */
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+    font-size: calc(1rem + 1.2vmin);
+    line-height: 1.45;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: var(--pad);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity var(--fade), transform var(--fade), visibility 0s var(--fade);
+    overflow: hidden;
+  }
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity var(--fade), transform var(--fade), visibility 0s;
+  }
+
+  /* slide modifiers */
+  .slide.center { justify-content: center; align-items: center; text-align: center; }
+  .slide.title  { justify-content: flex-end; }
+  .slide.title h1 { font-size: 4.2em; max-width: 11ch; margin-bottom: 0.25em; }
+  .slide.title p  { font-family: var(--mono); font-size: 0.7em; color: var(--muted); letter-spacing: 0.02em; }
+  .slide.title::after {
+    content: ""; display: block; width: 4em; height: 4px; background: var(--accent); margin-top: 1.2em;
+  }
+  .slide.dark { background: var(--accent); color: var(--bg); --muted: color-mix(in srgb, var(--bg) 70%, transparent); --rule: rgba(0,0,0,0.2); }
+  .slide.dark strong, .slide.dark .big { color: inherit; }
+
+  /* fragments */
+  .fragment { opacity: 0; transform: translateY(10px); transition: opacity 250ms, transform 250ms; }
+  .fragment.visible { opacity: 1; transform: none; }
+
+  /* ---------- content styles ---------- */
+  h1, h2, h3 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-variation-settings: "opsz" 96;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+    margin: 0 0 0.55em;
+    text-wrap: balance;
+  }
+  h1 { font-size: 3.4em; }
+  h2 { font-size: 2.3em; max-width: 18ch; }
+  h3 { font-size: 1.25em; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+  p, ul, ol { margin: 0 0 0.75em; max-width: 42ch; }
+  li { margin-bottom: 0.35em; padding-left: 0.2em; }
+  li::marker { color: var(--accent); }
+  a { color: var(--accent); }
+  strong { font-weight: 600; color: var(--accent); }
+  .muted { color: var(--muted); }
+  .eyebrow { font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 1em; }
+  .big { font-family: var(--display); font-weight: 800; font-size: 4.5em; line-height: 0.9; letter-spacing: -0.03em; color: var(--accent); margin: 0.1em 0; }
+  code, pre { font-family: var(--mono); font-size: 0.82em; }
+  code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+  pre { background: var(--panel); border: 1px solid var(--rule); padding: 0.8em 1em; border-radius: 8px; overflow: auto; line-height: 1.4; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 0 0 0.8em; padding-left: 0.8em; border-left: 4px solid var(--accent); color: var(--muted); max-width: 42ch; }
+  img, video, iframe { max-width: 100%; max-height: 70vh; border-radius: 6px; }
+  table { border-collapse: collapse; margin-bottom: 0.8em; }
+  th, td { padding: 0.3em 0.8em; border-bottom: 1px solid var(--rule); text-align: left; }
+  th { font-weight: 600; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6vmin; align-items: start; }
+  .panel { background: var(--panel); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 0.7em 0.9em; }
+  .src { font-family: var(--mono); font-size: 0.5em; color: var(--muted); margin-top: auto; padding-top: 0.8em; border-top: 1px solid var(--rule); }
+  .src p { margin: 0.15em 0; max-width: none; }
+
+  /* ---------- chrome ---------- */
+  .running, .counter {
+    position: fixed; font-family: var(--mono); font-size: 0.55em; color: var(--muted); z-index: 10; letter-spacing: 0.04em;
+  }
+  .running { left: 8vmin; top: 3vmin; text-transform: uppercase; }
+  .counter { right: 8vmin; bottom: 3vmin; font-variant-numeric: tabular-nums; }
+  .progress { position: fixed; left: 0; bottom: 0; height: 3px; width: 0; background: var(--accent); transition: width 200ms; z-index: 10; }
+  body.on-dark .running, body.on-dark .counter { color: rgba(0,0,0,0.55); }
+  body.on-dark .progress { background: rgba(0,0,0,0.6); }
+  .help {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); color: #fff;
+    display: none; place-items: center; z-index: 20; font-family: var(--mono); font-size: 0.65em;
+  }
+  .help.open { display: grid; }
+  .help table { border: none; }
+  .help td { border: none; padding: 0.25em 1em; }
+  .help kbd { background: #333; padding: 0.1em 0.5em; border-radius: 4px; border: 1px solid #555; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide, .fragment { transition: none; transform: none; }
+  }
+
+  /* ---------- print: one slide per page ---------- */
+  @media print {
+    body { overflow: visible; }
+    .deck { height: auto; }
+    .slide { position: relative; opacity: 1; visibility: visible; transform: none; height: 100vh; page-break-after: always; break-after: page; }
+    .fragment { opacity: 1; transform: none; }
+    .running, .counter, .progress, .help { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<main class="deck">
+
+  <!-- ============ SLIDES START ============ -->
+
+  <style>
+    :root { --bg: #131A36; --fg: #F2EFE6; --muted: #A5ACC8; --accent: #FFB547; }
+    .deck::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(60vmax 60vmax at 100% 100%, rgba(255, 181, 71, 0.18), transparent 60%);
+    }
+    .grid6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vmin 3vmin; }
+    .grid6 div { background: var(--panel); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 0.6em 0.8em; }
+    .grid6 b { display: block; font-family: var(--display); font-weight: 800; font-size: 1.1em; margin-bottom: 0.15em; }
+    .grid6 span { font-size: 0.72em; color: var(--muted); line-height: 1.35; display: block; }
+    .calc { display: grid; grid-template-columns: max-content auto; gap: 0.5em 1.2em; align-items: center; font-size: 0.9em; white-space: nowrap; }
+    .calc label { color: var(--muted); }
+    .calc input { font: inherit; font-family: var(--mono); color: var(--fg); background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 0.25em 0.5em; }
+    .calc output { font-family: var(--display); font-weight: 800; font-size: 1.4em; }
+    .calc output.hot { color: var(--accent); }
+    .debt { display: flex; flex-direction: column; height: 100%; }
+    .debt .bars { display: flex; gap: 2vmin; align-items: flex-end; height: 36vh; }
+    .debt .day { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+    .debt .bar { width: 100%; background: var(--accent); border-radius: 6px 6px 0 0; transition: height 300ms; min-height: 2px; }
+    .debt .val { font-family: var(--mono); font-size: 0.6em; margin-bottom: 0.4em; white-space: nowrap; }
+    .debt .lbl { font-family: var(--mono); font-size: 0.55em; color: var(--muted); margin-top: 0.5em; letter-spacing: 0.08em; }
+    .debt .cap { font-size: 0.7em; color: var(--muted); margin-top: 1em; max-width: none; }
+  </style>
+
+  <section class="slide title">
+    <h1>Why is everyone tired?</h1>
+    <p>Luke Barnard &middot; September 15, 2026 &middot; Presentation 2</p>
+  </section>
+
+  <section class="slide">
+    <h2>Show of hands</h2>
+    <p>How many hours did you sleep last night?</p>
+    <ul style="font-size:1.2em">
+      <li>Less than 6</li>
+      <li>6 to 7</li>
+      <li>7 to 8</li>
+      <li>8 or more</li>
+    </ul>
+    <p class="fragment"><strong>Teens need 8 to 10 hours.</strong> About 3 in 4 U.S. high schoolers get less than 8 on school nights.</p>
+    <div class="src"><p>CDC Youth Risk Behavior Survey; American Academy of Sleep Medicine</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>Sleep touches all six components</h2>
+    <div class="grid6">
+      <div class="fragment"><b>Physical</b><span>Growth hormone, immune repair, injury risk</span></div>
+      <div class="fragment"><b>Mental</b><span>The brain stores the day's memories during sleep. Cut the sleep and less of the day is kept.</span></div>
+      <div class="fragment"><b>Emotional</b><span>The amygdala overreacts by ~60% when sleep deprived</span></div>
+      <div class="fragment"><b>Social</b><span>Irritability, misreading faces and tone</span></div>
+      <div class="fragment"><b>Spiritual</b><span>Chronic tiredness lowers motivation and the sense that anything matters</span></div>
+      <div class="fragment"><b>Environmental</b><span>Drowsy driving causes ~100,000 crashes a year</span></div>
+    </div>
+    <div class="src"><p>Yoo et al. 2007 (amygdala); NHTSA (drowsy driving estimate)</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>It's biology, not laziness</h2>
+    <p>During puberty, the body's melatonin release shifts about <strong>2 hours later</strong>.</p>
+    <p class="fragment">School still starts at the same time.</p>
+    <div class="src"><p>Carskadon, adolescent circadian phase delay research</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>What sleep debt is</h2>
+    <p>You need about 9 hours. Get 7, and you are 2 hours short. That shortfall does not disappear when you wake up. It carries over to the next night.</p>
+    <p class="fragment">The body keeps count. A chemical called adenosine builds up every hour you are awake, and sleep clears it. Short sleep leaves some behind, and the leftover stacks up over the week.</p>
+    <p class="fragment">In one study, two weeks of 6 hours a night produced the same test scores as two full nights with no sleep at all. The subjects rated themselves as only slightly tired.</p>
+    <p class="fragment">You cannot bank sleep in advance, and one long night on the weekend repays only part of a week's debt.</p>
+    <div class="src"><p>Van Dongen et al. 2003, Sleep; Basheer et al. 2004 (adenosine and sleep pressure)</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>Do the math</h2>
+    <div class="cols">
+      <div class="calc" data-no-nav>
+        <label for="bed">Bed at</label> <input type="time" id="bed" value="23:30">
+        <label for="wake">Alarm at</label> <input type="time" id="wake" value="06:45">
+        <span>Hours slept</span> <output id="hrs">-</output>
+        <span>Short of 9 hours by</span> <output id="short">-</output>
+        <span>Debt by Friday</span> <output id="debt">-</output>
+      </div>
+      <div class="debt" data-no-nav>
+        <div class="bars" id="bars"></div>
+        <p class="cap">Hours of debt by each school night, if every night looks like this.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <h2>What a week of debt does</h2>
+    <ul>
+      <li class="fragment"><strong>Attention.</strong> In the 6-hour group, lapses kept climbing through day 14 and never leveled off.</li>
+      <li class="fragment"><strong>Memory.</strong> The brain files new learning during sleep. A short night after studying keeps less of it.</li>
+      <li class="fragment"><strong>Mood.</strong> Each hour of sleep a teen loses raises the odds of feeling hopeless by about a third.</li>
+      <li class="fragment"><strong>Driving.</strong> Drowsy-driving crashes are most common among drivers under 25.</li>
+    </ul>
+    <p class="fragment">Paying it off with an all-nighter makes it worse. After 17 to 19 hours awake, reaction time matches a blood alcohol level of 0.05%.</p>
+    <div class="src"><p>Van Dongen et al. 2003, Sleep; Winsler et al. 2015, J. Youth and Adolescence; NHTSA; Williamson &amp; Feyer 2000</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>What steals sleep</h2>
+    <ul>
+      <li class="fragment"><strong>Caffeine.</strong> Half-life around 5 hours. Half of a 3 p.m. energy drink is still in you at 8 p.m.</li>
+      <li class="fragment"><strong>The phone.</strong> The screen's light matters less than what's on it. Feeds are built to keep you scrolling past your bedtime.</li>
+      <li class="fragment"><strong>Weekends.</strong> Sleeping in 3+ hours later than on school days is "social jet lag." Your body clock shifts by the same amount as a flight across two time zones, twice a week.</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <h2>What actually helps</h2>
+    <ul>
+      <li class="fragment">A <strong>fixed wake time</strong>, even on weekends. Matters more than bedtime.</li>
+      <li class="fragment">Bright light in the first hour awake. Go outside.</li>
+      <li class="fragment">Caffeine cutoff after lunch.</li>
+      <li class="fragment">Phone charges outside the bedroom.</li>
+      <li class="fragment">A 20-minute nap before 3 p.m. helps. A two-hour nap at 6 p.m. pushes bedtime later.</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <h2>The bigger fix is public health</h2>
+    <p>The American Academy of Pediatrics recommends middle and high schools start <strong>no earlier than 8:30 a.m.</strong></p>
+    <p class="fragment">California made it law in 2022. Early results: more sleep, better attendance, fewer car crashes involving teens in districts that shifted.</p>
+    <p class="fragment">Our school at least clears the California minimum, so there is that.</p>
+    <p class="fragment">The other fix is to show up late. I have tested this one personally.</p>
+    <div class="src"><p>AAP policy statement 2014; California SB 328; Wahlstrom et al. 2014 (school start time study)</p></div>
+  </section>
+
+  <section class="slide center dark">
+    <h1>Caffeine is not a substitute for sleep.</h1>
+    <p class="muted">Questions?</p>
+    <p><a href="quiz.html?deck=sleep" target="_blank" style="color:inherit">Play the quiz</a></p>
+  </section>
+
+  <script>
+  (() => {
+    // --- sleep calculator ---
+    const bed = document.getElementById('bed'), wake = document.getElementById('wake');
+    const fmt = h => (Math.round(h * 10) / 10) + ' h';
+    function calc() {
+      const [bh, bm] = bed.value.split(':').map(Number);
+      const [wh, wm] = wake.value.split(':').map(Number);
+      if (isNaN(bh) || isNaN(wh)) return;
+      let hrs = (wh + wm / 60) - (bh + bm / 60);
+      if (hrs <= 0) hrs += 24;
+      const short = Math.max(0, 9 - hrs);
+      document.getElementById('hrs').textContent = fmt(hrs);
+      document.getElementById('short').textContent = fmt(short);
+      document.getElementById('debt').textContent = fmt(short * 5);
+      document.getElementById('short').classList.toggle('hot', short > 0);
+      document.getElementById('debt').classList.toggle('hot', short > 0);
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+      document.getElementById('bars').innerHTML = days.map((d, i) => {
+        const cum = short * (i + 1);
+        return `<div class="day"><span class="val">${fmt(cum)}</span><div class="bar" style="height:${Math.min(100, cum / 15 * 100)}%"></div><span class="lbl">${d}</span></div>`;
+      }).join('');
+    }
+    bed.addEventListener('input', calc); wake.addEventListener('input', calc); calc();
+
+  })();
+  </script>
+
+  <!-- ============ SLIDES END ============ -->
+
+</main>
+
+<div class="running"></div>
+<div class="counter" aria-live="polite"></div>
+<div class="progress"></div>
+
+<div class="help" data-no-nav>
+  <table>
+    <tr><td><kbd>→</kbd> <kbd>Space</kbd> <kbd>click</kbd></td><td>next</td></tr>
+    <tr><td><kbd>←</kbd> <kbd>Backspace</kbd></td><td>previous</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>first / last</td></tr>
+    <tr><td><kbd>f</kbd></td><td>fullscreen</td></tr>
+    <tr><td><kbd>?</kbd></td><td>this help</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>close</td></tr>
+  </table>
+</div>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.deck > .slide')];
+  const counter = document.querySelector('.counter');
+  const progress = document.querySelector('.progress');
+  const help = document.querySelector('.help');
+  document.querySelector('.running').textContent = document.title;
+  const pad = n => String(n).padStart(2, '0');
+
+  const Deck = {
+    current: 0,
+    count: slides.length,
+
+    go(n) {
+      n = Math.max(0, Math.min(this.count - 1, n));
+      if (n === this.current && slides[n].classList.contains('active')) return;
+      const from = this.current;
+      slides[from]?.classList.remove('active');
+      slides[n].classList.add('active');
+      this.current = n;
+
+      // moving backward: reveal all fragments on the target so prev() unwinds them
+      const frags = slides[n].querySelectorAll('.fragment');
+      frags.forEach(f => f.classList.toggle('visible', n < from));
+
+      history.replaceState(null, '', '#' + (n + 1));
+      counter.textContent = `${pad(n + 1)} / ${pad(this.count)}`;
+      progress.style.width = ((n + 1) / this.count * 100) + '%';
+      document.body.classList.toggle('on-dark', slides[n].classList.contains('dark'));
+      document.dispatchEvent(new CustomEvent('deck:change', { detail: { index: n, from, slide: slides[n] } }));
+    },
+
+    next() {
+      const hidden = slides[this.current].querySelector('.fragment:not(.visible)');
+      if (hidden) { hidden.classList.add('visible'); return; }
+      this.go(this.current + 1);
+    },
+
+    prev() {
+      const shown = [...slides[this.current].querySelectorAll('.fragment.visible')].pop();
+      if (shown) { shown.classList.remove('visible'); return; }
+      this.go(this.current - 1);
+    },
+
+    toggleFullscreen() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen?.();
+    },
+  };
+  window.Deck = Deck;
+
+  // --- keyboard ---
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, textarea, select, [contenteditable]')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown': case 'Enter':
+        e.preventDefault(); Deck.next(); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp': case 'Backspace':
+        e.preventDefault(); Deck.prev(); break;
+      case 'Home': e.preventDefault(); Deck.go(0); break;
+      case 'End':  e.preventDefault(); Deck.go(Deck.count - 1); break;
+      case 'f':    Deck.toggleFullscreen(); break;
+      case '?':    help.classList.toggle('open'); break;
+      case 'Escape': help.classList.remove('open'); break;
+    }
+  });
+
+  // --- click: left third = prev, rest = next; ignore interactive targets ---
+  document.addEventListener('click', e => {
+    if (help.classList.contains('open')) { help.classList.remove('open'); return; }
+    if (e.target.closest('a, button, input, textarea, select, label, video, audio, iframe, details, summary, [data-no-nav]')) return;
+    if (window.getSelection()?.toString()) return; // user was selecting text
+    if (e.clientX < window.innerWidth / 3) Deck.prev(); else Deck.next();
+  });
+
+  // --- touch swipe ---
+  let touchX = null;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    touchX = null;
+    if (Math.abs(dx) < 40) return;
+    dx < 0 ? Deck.next() : Deck.prev();
+  });
+
+  // --- hash sync ---
+  const fromHash = () => {
+    const n = parseInt(location.hash.slice(1), 10);
+    Deck.go(Number.isFinite(n) ? n - 1 : 0);
+  };
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+})();
+</script>
+
+</body>
+</html>
