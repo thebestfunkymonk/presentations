@@ -16,10 +16,16 @@ dependencies, no network. Open it in a browser, press F11, present.
 ```
 presentations/
   SPEC.md              this file
+  QUIZ.md              the quiz game
   presentation.html    the template. Copy it for each week.
-  2026-09-10-topic.html
-  2026-09-17-topic.html
+  index.html           links to every deck, grouped by class
+  quiz.html, quizzes/  the phone quiz and its question sets
+  health/              one folder per class
+  history/
+  shelved/             decks not being used
 ```
+
+Decks live one folder down, so links back to the quiz are `../quiz.html?deck=NAME`.
 
 One file per talk. Assets (images) sit next to the file or inline as data URIs.
 

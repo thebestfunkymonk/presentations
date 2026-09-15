@@ -359,7 +359,14 @@ const reactionPoints = ms => Math.round(Math.min(1000, 250000 / Math.max(ms, 1))
     }
     try { await loadScript('quizzes/' + deck + '.js'); } catch { app.innerHTML = `<h1>Couldn't load quizzes/${esc(deck)}.js</h1>`; return; }
     const Q = window.QUIZ;
-    const questions = Q.questions;
+    // Shuffle answer positions so the correct one isn't always in the same slot.
+    const shuffled = q => {
+      if (q.type === 'reaction' || !q.choices) return q;
+      const order = q.choices.map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+      return { ...q, choices: order.map(i => q.choices[i]), correct: order.indexOf(q.correct) };
+    };
+    const questions = Q.questions.map(shuffled);
 
     const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
     const code = params.get('room') || Array.from({ length: 4 }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
