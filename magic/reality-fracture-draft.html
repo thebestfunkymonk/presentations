@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reality Fracture Pick-Two Draft</title>
+<title>Reality Fracture Draft</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -202,80 +202,104 @@
   <section class="slide cover">
     <img src="https://mtg.guide/reality/art/jace-main.ec3a4cbad382.webp" alt="">
     <div class="cover-box">
-      <h1>Reality Fracture Pick-Two Draft</h1>
-      <p>Luke &middot; Draft night at the shop &middot; How to draft, build, and play</p>
+      <h1>Reality Fracture Draft</h1>
+      <p>Luke &middot; Draft night at the shop &middot; How the set works</p>
     </div>
     <span class="credit">Art: Reality Fracture key art / Wizards of the Coast</span>
   </section>
 
   <section class="slide">
     <div class="eyebrow">Tonight's format</div>
-    <h2>Pick-Two Draft</h2>
+    <h2>Booster Draft</h2>
     <div class="stats">
-      <div><p class="big">4</p><span>players per pod</span></div>
-      <div><p class="big">3</p><span>packs each</span></div>
-      <div><p class="big">2</p><span>cards per pick</span></div>
-      <div><p class="big">40</p><span>card deck</span></div>
+      <div><p class="big">3</p><span>Play Boosters each</span></div>
+      <div><p class="big">1</p><span>card per pick</span></div>
+      <div><p class="big">40</p><span>card deck minimum</span></div>
     </div>
     <ul>
-      <li>Take two, pass the rest. Left, right, left.</li>
-      <li>Your first pack comes back with 6 cards.</li>
-      <li>Two rounds. Winners play winners.</li>
+      <li>Open a pack, take one card, pass the rest. Pack 1 left, pack 2 right, pack 3 left.</li>
+      <li>Build from what you drafted plus any basic lands.</li>
     </ul>
-    <div class="src"><p>Wizards, Pick-Two Draft; mtg.guide, Draft &amp; Pick-Two 101</p></div>
-  </section>
-
-  <section class="slide">
-    <div class="eyebrow">Reality Echoes</div>
-    <h2>Echoed pairs</h2>
-    <p>Each pack has <strong>one matched pair</strong> of legends.</p>
-    <p>Draft both halves, and before each game they can start in exile. You may cast one as if it were in your hand.</p>
-    <p class="muted">Winner gets a set symbol pin.</p>
-    <div class="src"><p>WPN, Magic Presents: Reality Echoes</p></div>
+    <div class="src"><p>Wizards, Booster Draft format; mtg.guide, Draft 101</p></div>
   </section>
 
   <section class="slide figure">
     <div class="text">
-      <h2>What's new</h2>
+      <div class="eyebrow">The set's big mechanic</div>
+      <h2>Empower Jace</h2>
+      <p><strong>Empower Jace N</strong> puts N loyalty counters on your Jace token. No token yet? You create one first.</p>
+      <p>The token is a blue planeswalker with two abilities:</p>
       <ul>
-        <li><strong>Empower Jace:</strong> build up one Jace token. &minus;1 surveils, &minus;3 draws. It can be attacked.</li>
-        <li><strong>Prepare:</strong> the creature carries a small spell you can cast later. It still costs mana.</li>
-        <li><strong>Heartwood:</strong> token that taps for red or green every turn.</li>
+        <li><strong>&minus;1:</strong> Surveil 1</li>
+        <li><strong>&minus;3:</strong> Draw a card</li>
       </ul>
+      <p>It has no plus ability. More empower is the only way to refill it. You build up one token, not several.</p>
       <div class="src"><p>Wizards, Reality Fracture Mechanics; mtg.guide, Mechanics</p></div>
     </div>
     <figure>
       <img class="card" src="https://cards.scryfall.io/normal/front/f/5/f5324741-353a-4a70-adb2-b631b00806dd.jpg" alt="Mindseeker Oculus">
-      <figcaption>Mindseeker Oculus: empower Jace 4</figcaption>
+      <figcaption>Mindseeker Oculus: makes a Jace with 4 loyalty</figcaption>
+    </figure>
+  </section>
+
+  <section class="slide figure">
+    <div class="text">
+      <h2>How the Jace token works</h2>
+      <ul>
+        <li><strong>One ability per turn</strong>, in your main phase. Adding loyalty doesn't give you a second use.</li>
+        <li>You can use it <strong>the turn it's made</strong>.</li>
+        <li>It's a planeswalker, not a creature. It <strong>can't block</strong>, and opponents <strong>can attack it</strong>. Each point of damage removes a loyalty counter.</li>
+        <li>At 0 loyalty it's gone. If you spend the last counters on an ability, the ability still happens.</li>
+        <li>Empower can't add loyalty to a real Jace card, only the token.</li>
+        <li><strong>Behold a Jace:</strong> point to a Jace you control or reveal one from your hand. Nothing gets sacrificed.</li>
+      </ul>
+      <div class="src"><p>mtg.guide, Planeswalkers step by step; Comprehensive Rules 306, 606, 701</p></div>
+    </div>
+    <figure>
+      <img class="card" src="https://cards.scryfall.io/normal/front/1/4/145b928d-a7ff-4fe5-ae4d-bbae7b1d955b.jpg" alt="Countersculpt">
+      <figcaption>Countersculpt: costs 1 less if you behold a Jace, then empowers Jace 1</figcaption>
+    </figure>
+  </section>
+
+  <section class="slide figure">
+    <div class="text">
+      <h2>Prepare</h2>
+      <p>Some creatures carry a small spell. When the creature is <strong>prepared</strong>, you can pay that spell's cost and cast it once.</p>
+      <ul>
+        <li>The creature stays on the battlefield and becomes unprepared.</li>
+        <li>Most prepared spells are sorceries. Only two in the set are instants.</li>
+        <li>If the creature leaves before you cast it, the spell is gone.</li>
+        <li>You can't cast the small spell from your hand.</li>
+      </ul>
+      <div class="src"><p>mtg.guide, Mechanics; Comprehensive Rules 722</p></div>
+    </div>
+    <figure>
+      <img class="card" src="https://cards.scryfall.io/normal/front/2/9/29e7ec16-0c16-48aa-8e09-ce6e0d5bd40b.jpg" alt="Fatehold Chronologist">
+      <figcaption>Fatehold Chronologist enters prepared. Peer Review makes a 2/2 Cadet.</figcaption>
     </figure>
   </section>
 
   <section class="slide">
-    <div class="eyebrow">Every pick</div>
-    <h2>Ask four questions</h2>
-    <ol class="steps">
-      <li><strong>Can I play early?</strong></li>
-      <li><strong>What makes this work?</strong></li>
-      <li><strong>What answers their threat?</strong></li>
-      <li><strong>Do both picks fit my deck?</strong></li>
-    </ol>
-    <div class="src"><p>mtg.guide, the ten-second pick check</p></div>
+    <h2>Also in the set</h2>
+    <div class="grid g3">
+      <div><b>Heartwood</b><span>An artifact token that taps for red or green mana, every turn. You don't sacrifice it, and it can tap right away.</span></div>
+      <div><b>Surveil &amp; scry</b><span>Look at the top cards. Surveil puts any of them in your graveyard, scry puts them on the bottom. Neither one draws.</span></div>
+      <div><b>Threshold</b><span>Turns on with seven or more cards in your own graveyard. Tokens don't count.</span></div>
+    </div>
+    <div class="src"><p>mtg.guide, Mechanics</p></div>
   </section>
 
   <section class="slide">
-    <div class="eyebrow">Building</div>
-    <h2>Threats, removal, two colors</h2>
-    <ul>
-      <li>Start with your threats, then add removal.</li>
-      <li>Play your two best colors.</li>
-      <li><strong>17 lands, 23 spells.</strong> Most of them cost 2 or 3.</li>
-    </ul>
-    <div class="src"><p>Wizards, Reality Fracture Prerelease Guide</p></div>
+    <div class="eyebrow">In every pack</div>
+    <h2>Echoed pairs</h2>
+    <p>Each Play Booster has three borderless legends from a bonus sheet: <strong>two that form an echoed pair</strong> and one unpaired legend.</p>
+    <p>A pair is two versions of the same character, one from each reality. They're two separate cards. Taking one doesn't mean you need the other, and they might not fit the same deck.</p>
+    <div class="src"><p>WPN, Magic Presents: Reality Echoes; mtg.guide, Reality Fracture</p></div>
   </section>
 
   <section class="slide center dark">
-    <h1>Draft the deck, not the rare.</h1>
-    <p class="muted">Questions? Then grab your three packs.</p>
+    <h1>Grab your packs.</h1>
+    <p class="muted">Questions?</p>
     <p><a href="https://mtg.guide/reality/" target="_blank">mtg.guide/reality</a></p>
   </section>
 
