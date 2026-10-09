@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reality Fracture Pick-Two Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Archivo:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- theme: edit these ---------- */
+  :root {
+    --paper: #FFFFFF;
+    --ink: #0A0A0A;
+    --gray: #6B6B6B;
+    --accent: #FFD400;
+    --shadow: 6px 6px 0 var(--ink);
+    --display: "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
+    --font: "Archivo", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "Space Mono", ui-monospace, Menlo, monospace;
+    --mast: 2.4em;
+    --pad: 5vmin 7vmin 5vmin;
+    color-scheme: light;
+  }
+
+  /* ---------- deck plumbing: mostly leave alone ---------- */
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: calc(1rem + 1.15vmin);
+    line-height: 1.4;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  * { border-radius: 0 !important; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: var(--pad);
+    padding-top: calc(var(--mast) + 4vmin);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    visibility: hidden;
+    overflow: hidden;
+  }
+  .slide.active { visibility: visible; }
+
+  /* slide modifiers */
+  .slide.center { justify-content: center; align-items: center; text-align: center; }
+  .slide.center h1 { max-width: 14ch; }
+  .slide.dark { background: var(--accent); }
+  .slide.dark h1 { font-style: italic; font-weight: 400; }
+  .slide.dark strong { background: var(--ink); color: var(--accent); }
+  .slide.dark .muted { color: var(--ink); opacity: 0.7; }
+
+  /* cover: full-bleed photo, headline in a hard-shadow box */
+  .slide.cover { padding: 0; justify-content: flex-end; }
+  .slide.cover > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; max-height: none; filter: grayscale(1) contrast(1.05); }
+  .slide.cover .cover-box {
+    position: relative; margin: 0 7vmin 7vmin; padding: 1em 1.2em 1.1em; max-width: 60%;
+    background: var(--paper); border: 3px solid var(--ink); box-shadow: var(--shadow);
+  }
+  .slide.cover h1 { font-size: 3.8em; margin-bottom: 0.3em; }
+  .slide.cover .cover-box p { font-family: var(--mono); font-size: 0.6em; margin: 0; max-width: none; }
+  .credit {
+    position: absolute; right: 0; bottom: 0; font-family: var(--mono); font-size: 0.45em;
+    background: var(--ink); color: var(--paper); padding: 0.4em 0.9em;
+  }
+
+  /* figure: text left, photo right */
+  .slide.figure { display: grid; grid-template-columns: 1fr 0.85fr; gap: 6vmin; align-items: stretch; }
+  .slide.figure .text { display: flex; flex-direction: column; min-width: 0; }
+  .slide.figure figure { margin: 0; display: flex; flex-direction: column; min-height: 0; padding-right: 8px; padding-bottom: 8px; }
+  .slide.figure figure img {
+    flex: 1; width: 100%; min-height: 0; max-height: none; object-fit: cover;
+    border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); filter: grayscale(1) contrast(1.05);
+  }
+  figcaption { font-family: var(--mono); font-size: 0.5em; color: var(--gray); margin-top: 1.2em; }
+
+  /* fragments: hard cuts */
+  .fragment { visibility: hidden; }
+  .slide.active .fragment.visible { visibility: visible; }
+
+  /* ---------- content styles ---------- */
+  h1, h2, h3 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-variation-settings: "opsz" 72;
+    letter-spacing: -0.02em;
+    line-height: 0.98;
+    margin: 0 0 0.5em;
+    text-wrap: balance;
+  }
+  h1 { font-size: 4em; }
+  h2 { font-size: 2.7em; max-width: 16ch; }
+  h3 { font-size: 1.3em; font-style: italic; font-weight: 400; letter-spacing: 0; }
+  em { font-family: var(--display); font-style: italic; font-size: 1.05em; }
+  p, ul, ol { margin: 0 0 0.75em; max-width: 44ch; }
+  ul { padding-left: 1.2em; }
+  li { margin-bottom: 0.4em; padding-left: 0.2em; }
+  li::marker { content: "\25A0\00a0\00a0"; color: var(--accent); font-size: 0.8em; }
+  a { color: var(--ink); text-decoration-thickness: 3px; text-decoration-color: var(--accent); text-underline-offset: 0.15em; }
+  strong { font-weight: 600; background: var(--accent); padding: 0 0.15em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .muted { color: var(--gray); }
+  .eyebrow { display: inline-block; font-family: var(--mono); font-size: 0.55em; letter-spacing: 0.12em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 0.25em 0.7em; margin-bottom: 1.2em; }
+  .big { font-family: var(--font); font-weight: 900; font-size: 5em; line-height: 0.9; letter-spacing: -0.04em; color: var(--accent); -webkit-text-stroke: 2px var(--ink); margin: 0.1em 0; }
+  code, pre { font-family: var(--mono); font-size: 0.8em; }
+  code { background: #EEE; padding: 0.1em 0.35em; }
+  pre { border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 0.8em 1em; overflow: auto; line-height: 1.4; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 0 0 0.8em; padding-left: 0.8em; border-left: 6px solid var(--accent); font-family: var(--display); font-style: italic; font-size: 1.25em; max-width: 36ch; }
+  img, video, iframe { max-width: 100%; max-height: 70vh; }
+  table { border-collapse: collapse; margin-bottom: 0.8em; }
+  th, td { padding: 0.3em 0.8em; border-bottom: 1px solid var(--ink); text-align: left; }
+  th { font-weight: 600; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6vmin; align-items: start; }
+  .cols > * { min-width: 0; }
+  .panel { border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 0.7em 0.9em; background: var(--paper); }
+  .src { font-family: var(--mono); font-size: 0.5em; color: var(--gray); margin-top: auto; padding-top: 0.8em; border-top: 1px solid var(--ink); }
+  .src p { margin: 0.15em 0; max-width: none; }
+
+  /* ---------- chrome: masthead, folio, progress, fullscreen ---------- */
+  .masthead {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--mast); z-index: 10;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 7vmin;
+    background: var(--paper); border-bottom: 3px solid var(--ink);
+    font-family: var(--mono); font-size: 0.55em; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .counter { font-variant-numeric: tabular-nums; }
+  .progress { position: fixed; left: 0; top: var(--mast); height: 6px; width: 0; background: var(--accent); z-index: 10; }
+  .fs {
+    position: fixed; left: 7vmin; bottom: 3vmin; z-index: 10; font-family: var(--mono); font-size: 0.5em;
+    background: var(--paper); color: var(--ink); border: 2px solid var(--ink); padding: 0.4em 0.9em; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .fs:hover { background: var(--ink); color: var(--paper); }
+  :fullscreen .fs { display: none; }
+  .help {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.88); color: #fff;
+    display: none; place-items: center; z-index: 20; font-family: var(--mono); font-size: 0.65em;
+  }
+  .help.open { display: grid; }
+  .help table { border: none; }
+  .help td { border: none; padding: 0.25em 1em; }
+  .help kbd { background: #333; padding: 0.1em 0.5em; border: 1px solid #555; }
+
+  /* ---------- print: one slide per page ---------- */
+  @media print {
+    body { overflow: visible; }
+    .deck { height: auto; }
+    .slide { position: relative; visibility: visible; height: 100vh; page-break-after: always; break-after: page; }
+    .fragment { visibility: visible; }
+    .masthead, .progress, .help, .fs { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<main class="deck">
+
+  <!-- ============ SLIDES START ============ -->
+
+  <style>
+    :root { --accent: #B39DFF; }
+    .slide.cover > img, .slide.figure figure img { filter: none; }
+    .slide.figure figure img.card { object-fit: contain; border: 0; box-shadow: none; }
+    .grid { display: grid; gap: 2.4vmin 3vmin; padding-right: 8px; }
+    .g2 { grid-template-columns: repeat(2, 1fr); }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g5 { grid-template-columns: repeat(5, 1fr); }
+    .grid > div { border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); padding: 0.5em 0.7em; background: var(--paper); }
+    .grid b { display: block; font-family: var(--display); font-weight: 500; font-size: 1.1em; line-height: 1.05; margin-bottom: 0.25em; }
+    .grid span { font-size: 0.62em; color: var(--gray); line-height: 1.35; display: block; }
+    .grid .pip { font-family: var(--mono); font-size: 0.5em; letter-spacing: 0.08em; background: var(--ink); color: var(--paper); padding: 0.1em 0.5em; display: inline-block; margin-bottom: 0.4em; }
+    .stats { display: flex; gap: 5vmin; margin: 0.4em 0 0.8em; }
+    .stats div { text-align: left; }
+    .stats .big { font-size: 3.4em; }
+    .stats span { font-family: var(--mono); font-size: 0.55em; text-transform: uppercase; letter-spacing: 0.08em; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4vmin; align-items: start; }
+    .cards figure { margin: 0; }
+    .cards img { width: 100%; max-height: 46vh; object-fit: contain; }
+    .cards figcaption { font-size: 0.55em; margin-top: 0.6em; }
+    .curve { display: flex; gap: 2vmin; align-items: flex-end; height: 36vh; border-bottom: 3px solid var(--ink); max-width: 60vw; }
+    .curve div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+    .curve i { width: 100%; background: var(--accent); border: 3px solid var(--ink); border-bottom: 0; box-sizing: border-box; }
+    .curve em { font-family: var(--mono); font-style: normal; font-size: 0.6em; margin-bottom: 0.3em; }
+    .curve-l { display: flex; gap: 2vmin; max-width: 60vw; }
+    .curve-l span { flex: 1; text-align: center; font-family: var(--mono); font-size: 0.55em; margin-top: 0.5em; text-transform: uppercase; }
+    ol.steps { padding-left: 1.4em; max-width: 52ch; }
+    ol.steps li { margin-bottom: 0.5em; }
+    ol.steps li::marker { content: counter(list-item) "  "; font-family: var(--mono); font-weight: 700; color: var(--accent); }
+  </style>
+
+  <section class="slide cover">
+    <img src="https://mtg.guide/reality/art/jace-main.ec3a4cbad382.webp" alt="">
+    <div class="cover-box">
+      <h1>Reality Fracture Pick-Two Draft</h1>
+      <p>Luke &middot; Draft night at the shop &middot; How to draft, build, and play</p>
+    </div>
+    <span class="credit">Art: Reality Fracture key art / Wizards of the Coast</span>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Tonight's format</div>
+    <h2>Pick-Two Draft in one slide</h2>
+    <div class="stats">
+      <div><p class="big">4</p><span>players per pod</span></div>
+      <div><p class="big">3</p><span>Play Boosters each</span></div>
+      <div><p class="big">2</p><span>cards per pick</span></div>
+      <div><p class="big">40</p><span>card deck minimum</span></div>
+    </div>
+    <ul>
+      <li class="fragment">Take <strong>two cards</strong> from the pack, pass the rest. Pack 1 left, pack 2 right, pack 3 left.</li>
+      <li class="fragment">You end with about <strong>42 cards</strong>. Add as many basic lands as you want.</li>
+      <li class="fragment">Two rounds of one-on-one. Round 2: winners play winners.</li>
+    </ul>
+    <div class="src"><p>Wizards of the Coast, Pick-Two Draft format page</p></div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Know this before pack one</div>
+    <h2>Packs come back to you</h2>
+    <p>In a four-player pod, your 14-card first pack <strong>returns with six cards</strong> after everyone has taken two.</p>
+    <p class="fragment">So you will see every pack you open twice. Remember what you passed, but don't build around it coming back: three other people each take two.</p>
+    <p class="fragment">You are not locked into the colors of your first pick.</p>
+    <div class="src"><p>mtg.guide, Draft &amp; Pick-Two 101</p></div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Magic Presents: Reality Echoes &middot; Oct 16 &ndash; Nov 5</div>
+    <h2>Echoed pairs</h2>
+    <p>Every Play Booster has three bonus-sheet legends: <strong>one true echoed pair</strong> and one unpaired legend.</p>
+    <ul>
+      <li class="fragment">Before each game, you may reveal two <em>different</em> cards from one echoed pair. They start the game in exile.</li>
+      <li class="fragment">You may cast one of them as though it were in your hand. Then you may shuffle the other into your library.</li>
+      <li class="fragment">One pair per game. Two copies of the same card are not a pair. Normal costs and timing apply.</li>
+      <li class="fragment">You don't have to draft a pair. A pair is not a reason to force a third color.</li>
+    </ul>
+    <p class="fragment muted">Draft winner gets a Reality Fracture set symbol pin, while supplies last.</p>
+    <div class="src"><p>WPN, Magic Presents: Reality Echoes; mtg.guide, Reality Fracture build notes</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>What's new on the cards</h2>
+    <div class="grid g3">
+      <div class="fragment"><b>Empower Jace N</b><span>Put N loyalty on your Jace token. No token yet? Make one first. You only ever build up one token.</span></div>
+      <div class="fragment"><b>Prepare</b><span>The creature carries a small spell. While it's prepared, pay that spell's cost to cast it once. The creature stays.</span></div>
+      <div class="fragment"><b>Heartwood</b><span>Artifact token. Taps for red or green, every turn. Not a Treasure, you don't sacrifice it.</span></div>
+      <div class="fragment"><b>Surveil &amp; scry</b><span>Look at the top cards. Surveil can bin them, scry can bottom them. Neither one draws.</span></div>
+      <div class="fragment"><b>Threshold</b><span>Seven or more cards in <em>your</em> graveyard. Tokens don't count.</span></div>
+      <div class="fragment"><b>Behold a Jace</b><span>Point at a Jace you control, or reveal one from hand. It's proof, not a sacrifice.</span></div>
+    </div>
+    <div class="src"><p>Wizards, Reality Fracture Mechanics; mtg.guide, Mechanics</p></div>
+  </section>
+
+  <section class="slide figure">
+    <div class="text">
+      <div class="eyebrow">The set's main character</div>
+      <h2>Your Jace token</h2>
+      <ul>
+        <li><strong>&minus;1:</strong> surveil 1. <strong>&minus;3:</strong> draw a card.</li>
+        <li class="fragment">One ability per turn, in your main phase. Adding loyalty doesn't give you a second use.</li>
+        <li class="fragment">It's a planeswalker, not a creature. It can't block, and your opponent can attack it.</li>
+        <li class="fragment">Protect the board before chasing value. A Jace that dies to one attack gives you less than a plain blocker.</li>
+      </ul>
+      <div class="src"><p>mtg.guide, Planeswalkers step by step</p></div>
+    </div>
+    <figure>
+      <img class="card" src="https://cards.scryfall.io/normal/front/f/5/f5324741-353a-4a70-adb2-b631b00806dd.jpg" alt="Mindseeker Oculus">
+      <figcaption>Mindseeker Oculus: empower 4, then &minus;3 to draw right away</figcaption>
+    </figure>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">When the pack hits you</div>
+    <h2>The ten-second pick check</h2>
+    <ol class="steps">
+      <li class="fragment"><strong>Can I play early?</strong> Check your two- and three-drops before taking another expensive reward.</li>
+      <li class="fragment"><strong>What enables this?</strong> Name the card that makes the payoff work. A second payoff isn't an enabler.</li>
+      <li class="fragment"><strong>What answers their threat?</strong> Keep removal. Check whether it hits planeswalkers too.</li>
+      <li class="fragment"><strong>Can I use both picks?</strong> Two cards that look like a pair can want different decks.</li>
+    </ol>
+    <div class="src"><p>mtg.guide, Reality Fracture start page</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>Early, middle, late</h2>
+    <div class="grid g3">
+      <div class="fragment"><b>Early picks</b><span>Explore. Take strong cards you can cast without a hard mana commitment. Notice a pattern of good cards in one color, not one surprise.</span></div>
+      <div class="fragment"><b>Middle picks</b><span>Make it work. A plain creature that fills your empty two-mana slot can beat another five-drop. Signals are evidence, not a promise.</span></div>
+      <div class="fragment"><b>Late picks</b><span>Fill holes. Take cards that make your deck over cards that only stop someone else. You may never play that person.</span></div>
+    </div>
+    <div class="src"><p>mtg.guide, Draft &amp; Pick-Two 101 (citing Reid Duke and Marshall Sutcliffe, Wizards)</p></div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Wizards' ten archetypes</div>
+    <h2 style="max-width:none">Every two-color pair has a plan</h2>
+    <div class="grid g5" style="font-size:0.9em">
+      <div><span class="pip">W U</span><b>Fatehold</b><span>Surveil aggro</span></div>
+      <div><span class="pip">U B</span><b>Theorix</b><span>Graveyard math, reach threshold</span></div>
+      <div><span class="pip">B R</span><b>Stingerquill</b><span>Burn their face</span></div>
+      <div><span class="pip">R G</span><b>Konstrari</b><span>Heartwood ramp into big creatures</span></div>
+      <div><span class="pip">G W</span><b>Vigorbloom</b><span>Life gain and +1/+1 counters</span></div>
+      <div><span class="pip">W B</span><b>Liliana</b><span>Attrition, small creatures that die well</span></div>
+      <div><span class="pip">U R</span><b>Chandra</b><span>Prowess, cheap noncreature spells</span></div>
+      <div><span class="pip">B G</span><b>Garruk</b><span>Value creatures and recursion</span></div>
+      <div><span class="pip">R W</span><b>Ajani</b><span>Go-wide Cadet tokens and counters</span></div>
+      <div><span class="pip">G U</span><b>Jace</b><span>Empower Jace and use him all game</span></div>
+    </div>
+    <p class="fragment" style="max-width:none;margin-top:1em">Use the theme as a test, not a rule. Your cards might support a removal deck even in an "aggro" pair.</p>
+    <div class="src"><p>Wizards, Reality Fracture Prerelease Guide; mtg.guide, What matters in Reality Fracture</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>Name the card's job</h2>
+    <div class="cards">
+      <figure><img src="https://cards.scryfall.io/normal/front/2/f/2f5345ae-4489-4d05-b2d5-c71285254f05.jpg" alt="Memory Trap"><figcaption><strong>Answer.</strong> Memory Trap deals with almost any nonland threat, planeswalkers included.</figcaption></figure>
+      <figure><img src="https://cards.scryfall.io/normal/front/0/e/0e44f959-1322-4abd-b6eb-dea992307c0c.jpg" alt="Skilled Battlecarver"><figcaption><strong>Early play.</strong> Skilled Battlecarver is a strong two-mana attacker.</figcaption></figure>
+      <figure><img src="https://cards.scryfall.io/normal/front/9/1/910a1f41-17fd-4ab0-9597-7151e79dc760.jpg" alt="Heartwood Crafter"><figcaption><strong>Mana.</strong> Heartwood Crafter ramps, but only for spells cast from outside your hand.</figcaption></figure>
+    </div>
+    <div class="src"><p>mtg.guide, What job does this card do?</p></div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Wizards' deckbuilding order</div>
+    <h2>Build from threats, then removal</h2>
+    <ol class="steps">
+      <li class="fragment">Sort by color. Put multicolor, artifacts, and lands in their own piles.</li>
+      <li class="fragment">Find your <strong>threats</strong>, the cards that can win on their own. One or two in a color is a reason to play it.</li>
+      <li class="fragment">Add <strong>removal</strong>. Counterspells and discard count.</li>
+      <li class="fragment">Pick your <strong>two best colors</strong>. Three colors stretches your mana and can lock you out of games.</li>
+      <li class="fragment">Say how the deck wins in one sentence. Cut what doesn't help that sentence.</li>
+    </ol>
+    <div class="src"><p>Wizards, Reality Fracture Prerelease Guide; mtg.guide, Build</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>The curve: 23 spells, 17 lands</h2>
+    <div class="curve">
+      <div><em>1&ndash;2</em><i style="height:19%"></i></div>
+      <div><em>7&ndash;8</em><i style="height:100%"></i></div>
+      <div><em>5&ndash;6</em><i style="height:75%"></i></div>
+      <div><em>3&ndash;4</em><i style="height:50%"></i></div>
+      <div><em>2&ndash;3</em><i style="height:31%"></i></div>
+      <div><em>0&ndash;1</em><i style="height:6%"></i></div>
+    </div>
+    <div class="curve-l"><span>1 mana</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6+</span></div>
+    <p class="fragment" style="margin-top:1em">A starting template, not a quota. Aggro leans low. Konstrari ramp can lean high. Start at 9/8 lands and adjust for double-pip cards.</p>
+    <div class="src"><p>Wizards, Reality Fracture Prerelease Guide (curve); mtg.guide, Build (land split)</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>Rules for every deck</h2>
+    <ul>
+      <li class="fragment"><strong>A prepared spell still costs mana.</strong> It's only there while the creature survives.</li>
+      <li class="fragment"><strong>Jace is a choice, not free cards.</strong> Surveil, draw, and granted abilities share one activation.</li>
+      <li class="fragment"><strong>Hybrid cards fit either color.</strong> A W/U hybrid doesn't need both.</li>
+      <li class="fragment"><strong>Fixing has to make the right color.</strong> Heartwoods only make red or green.</li>
+      <li class="fragment"><strong>A playable plus fixing</strong> beats two exciting cards you can't cast.</li>
+    </ul>
+    <div class="src"><p>mtg.guide, Build: rules for every deck</p></div>
+  </section>
+
+  <section class="slide">
+    <h2>At the table</h2>
+    <ul>
+      <li class="fragment"><strong>Keep hands with a route into the game.</strong> Lands plus a play by turn 2 or 3 beats lands plus bombs.</li>
+      <li class="fragment"><strong>Attacking Jace or the player?</strong> Pick the one that stops them winning. Don't send everything at Jace if you have lethal.</li>
+      <li class="fragment"><strong>Use removal on real problems.</strong> "Always save it for a bomb" is too rigid.</li>
+      <li class="fragment"><strong>Announce clearly:</strong> loyalty abilities, prepared spells, and who or what you're attacking.</li>
+      <li class="fragment">Not sure how two cards interact? <strong>Ask.</strong> This is a casual event.</li>
+    </ul>
+    <div class="src"><p>mtg.guide, Build: make the next decision</p></div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Before we start</div>
+    <h2>Checklist</h2>
+    <div class="cols">
+      <ul>
+        <li>Sleeves and a deck box</li>
+        <li>Pen and paper for life</li>
+        <li>Dice for Jace loyalty and +1/+1 counters, two different kinds</li>
+        <li>Companion app signed in to your Wizards account</li>
+      </ul>
+      <div class="panel">
+        <p><strong>No notes or apps</strong> while drafting, building, or playing.</p>
+        <p style="margin:0">Brief notes are fine between games. Keep your pool separate from other events' cards.</p>
+      </div>
+    </div>
+    <div class="src"><p>mtg.guide, Before a paper event; Magic Tournament Rules</p></div>
+  </section>
+
+  <section class="slide center dark">
+    <h1>Draft the deck, not the rare.</h1>
+    <p class="muted">Questions? Then grab your three packs.</p>
+    <p><a href="https://mtg.guide/reality/" target="_blank">mtg.guide/reality</a></p>
+  </section>
+
+  <!-- ============ SLIDES END ============ -->
+
+</main>
+
+<div class="masthead"><span class="running"></span><span class="counter" aria-live="polite"></span></div>
+<div class="progress"></div>
+<button class="fs" data-no-nav onclick="Deck.toggleFullscreen()">Fullscreen</button>
+
+<div class="help" data-no-nav>
+  <table>
+    <tr><td><kbd>→</kbd> <kbd>Space</kbd> <kbd>click</kbd></td><td>next</td></tr>
+    <tr><td><kbd>←</kbd> <kbd>Backspace</kbd></td><td>previous</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>first / last</td></tr>
+    <tr><td><kbd>f</kbd></td><td>fullscreen</td></tr>
+    <tr><td><kbd>?</kbd></td><td>this help</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>close</td></tr>
+  </table>
+</div>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.deck > .slide')];
+  const counter = document.querySelector('.counter');
+  const progress = document.querySelector('.progress');
+  const help = document.querySelector('.help');
+  document.querySelector('.running').textContent = document.title;
+  const pad = n => String(n).padStart(2, '0');
+
+  const Deck = {
+    current: 0,
+    count: slides.length,
+
+    go(n) {
+      n = Math.max(0, Math.min(this.count - 1, n));
+      if (n === this.current && slides[n].classList.contains('active')) return;
+      const from = this.current;
+      slides[from]?.classList.remove('active');
+      slides[n].classList.add('active');
+      this.current = n;
+
+      // moving backward: reveal all fragments on the target so prev() unwinds them
+      const frags = slides[n].querySelectorAll('.fragment');
+      frags.forEach(f => f.classList.toggle('visible', n < from));
+
+      history.replaceState(null, '', '#' + (n + 1));
+      counter.textContent = `${pad(n + 1)} / ${pad(this.count)}`;
+      progress.style.width = ((n + 1) / this.count * 100) + '%';
+      document.dispatchEvent(new CustomEvent('deck:change', { detail: { index: n, from, slide: slides[n] } }));
+    },
+
+    next() {
+      const hidden = slides[this.current].querySelector('.fragment:not(.visible)');
+      if (hidden) { hidden.classList.add('visible'); return; }
+      this.go(this.current + 1);
+    },
+
+    prev() {
+      const shown = [...slides[this.current].querySelectorAll('.fragment.visible')].pop();
+      if (shown) { shown.classList.remove('visible'); return; }
+      this.go(this.current - 1);
+    },
+
+    toggleFullscreen() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen?.();
+    },
+  };
+  window.Deck = Deck;
+
+  // --- keyboard ---
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, textarea, select, [contenteditable]')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown': case 'Enter':
+        e.preventDefault(); Deck.next(); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp': case 'Backspace':
+        e.preventDefault(); Deck.prev(); break;
+      case 'Home': e.preventDefault(); Deck.go(0); break;
+      case 'End':  e.preventDefault(); Deck.go(Deck.count - 1); break;
+      case 'f':    Deck.toggleFullscreen(); break;
+      case '?':    help.classList.toggle('open'); break;
+      case 'Escape': help.classList.remove('open'); break;
+    }
+  });
+
+  // --- click: left third = prev, rest = next; ignore interactive targets ---
+  document.addEventListener('click', e => {
+    if (help.classList.contains('open')) { help.classList.remove('open'); return; }
+    if (e.target.closest('a, button, input, textarea, select, label, video, audio, iframe, details, summary, [data-no-nav]')) return;
+    if (window.getSelection()?.toString()) return; // user was selecting text
+    if (e.clientX < window.innerWidth / 3) Deck.prev(); else Deck.next();
+  });
+
+  // --- touch swipe ---
+  let touchX = null;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    touchX = null;
+    if (Math.abs(dx) < 40) return;
+    dx < 0 ? Deck.next() : Deck.prev();
+  });
+
+  // --- hash sync ---
+  const fromHash = () => {
+    const n = parseInt(location.hash.slice(1), 10);
+    Deck.go(Number.isFinite(n) ? n - 1 : 0);
+  };
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+})();
+</script>
+
+</body>
+</html>
